@@ -57,8 +57,8 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
 
   const isBottom = caption.position !== "top";
   const verticalStyle: React.CSSProperties = isBottom
-    ? { bottom: SAFE.titleY + 18 }
-    : { top: SAFE.titleY + 18 };
+    ? { bottom: 60 }
+    : { top: 60 };
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
@@ -71,23 +71,15 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 8,
+          gap: 5,
           opacity,
           transform: `translateY(${translateY}px)`,
         }}
       >
         <Line
-          text={caption.en}
-          family={fonts.en}
-          size={44}
-          weight={700}
-          color={theme.softWhite}
-          accent={theme.copper}
-        />
-        <Line
           text={caption.jp}
           family={fonts.jp}
-          size={38}
+          size={28}
           weight={700}
           color={theme.gold}
           accent={theme.amber}
@@ -95,9 +87,17 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
         <Line
           text={caption.bn}
           family={fonts.bn}
-          size={36}
+          size={26}
           weight={700}
           color={theme.amber}
+          accent={theme.copper}
+        />
+        <Line
+          text={caption.en}
+          family={fonts.en}
+          size={22}
+          weight={600}
+          color={theme.softWhite}
           accent={theme.copper}
         />
       </div>
@@ -121,14 +121,14 @@ const Line: React.FC<{
       color,
       textAlign: "center",
       lineHeight: 1.15,
-      letterSpacing: 0.3,
-      padding: "7px 20px",
-      background: "rgba(14,10,6,0.7)",
-      borderLeft: `4px solid ${accent}`,
-      borderRadius: 6,
+      letterSpacing: 0.2,
+      padding: "4px 14px",
+      background: "rgba(14,10,6,0.72)",
+      borderLeft: `3px solid ${accent}`,
+      borderRadius: 5,
       backdropFilter: "blur(6px)",
-      textShadow: "0 2px 10px rgba(0,0,0,0.55)",
-      maxWidth: "86%",
+      textShadow: "0 2px 8px rgba(0,0,0,0.6)",
+      maxWidth: "82%",
     }}
   >
     {text}

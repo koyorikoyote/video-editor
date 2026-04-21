@@ -107,27 +107,11 @@ for (let i = 0; i < merged.length; i++) {
 }
 let concatIns = "";
 for (let i = 0; i < merged.length; i++) concatIns += `[v${i}][a${i}]`;
+// Audio is left untouched (raw original) — the source already had clean
+// studio audio and the previous filter chain was too aggressive (made the
+// speech sound processed and thin). We only do the trim+concat here.
 lines.push(
-  `${concatIns}concat=n=${merged.length}:v=1:a=1[vout][aconcat]`,
-);
-
-// Speech-clarity chain. Order matters: gate out background BEFORE denoise
-// so afftdn's noise profile isn't trained on real speech dips; denoise
-// before dynaudnorm so the normalizer isn't amplifying hiss between words.
-lines.push(
-  "[aconcat]" +
-    [
-      "agate=threshold=-45dB:ratio=9:attack=3:release=120:knee=6dB",
-      "afftdn=nr=30:nt=w:tn=1",
-      "anlmdn=s=8:p=0.004:r=0.006",
-      "highpass=f=95:poles=2",
-      "lowpass=f=11500:poles=2",
-      "dynaudnorm=f=150:g=7:p=0.7:m=15:s=12",
-      "acompressor=threshold=-20dB:ratio=3:attack=4:release=200:makeup=2",
-      "loudnorm=I=-18:TP=-1.6:LRA=5",
-      "alimiter=limit=0.83:attack=3:release=80",
-    ].join(",") +
-    "[aout]",
+  `${concatIns}concat=n=${merged.length}:v=1:a=1[vout][aout]`,
 );
 
 const filterScript = lines.join(";\n");
