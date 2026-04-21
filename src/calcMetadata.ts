@@ -28,6 +28,7 @@ export const calcCompositionMetadata: CalculateMetadataFunction<
   const totalFrames = HOOK_FRAMES + mainFrames + CTA_FRAMES - 12; // offsets -6 twice
   return {
     durationInFrames: totalFrames,
+    defaultOutName: "out/japan-promo",
     props: {
       ...props,
       hookFrames: HOOK_FRAMES,

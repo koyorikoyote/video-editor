@@ -16,7 +16,7 @@ edit with:
 npm i              # install JS deps
 npm run dev        # Remotion Studio preview (http://localhost:3000)
 npm run lint       # eslint + tsc
-npx remotion render JapanPromo out.mp4   # final render
+npx remotion render JapanPromo           # writes to out/japan-promo.mp4 (defaultOutName in calcMetadata.ts)
 ```
 
 The `JapanPromo-SafeZone` composition shows 16:9 title-safe / action-safe
@@ -160,7 +160,7 @@ npm run lint                       # eslint + tsc
 npx remotion still JapanPromo --scale=0.5 --frame=300 /tmp/check.png
 
 # Render
-npx remotion render JapanPromo out.mp4
+npx remotion render JapanPromo
 ```
 
 ## Repo layout
