@@ -38,20 +38,38 @@ const keptSegments = JSON.parse(cutmapMatch[1]);
 const remap = (originalSec) => {
   let t = 0;
   for (const [s, e] of keptSegments) {
-    if (originalSec < s) return { sec: t, kept: false };
-    if (originalSec < e) return { sec: t + (originalSec - s), kept: true };
+    if (originalSec < s) return t;          // before this kept span
+    if (originalSec < e) return t + (originalSec - s);
     t += e - s;
   }
-  return { sec: t, kept: false };
+  return t;
+};
+
+// Snap a timestamp that falls inside a removed-silence range onto a kept
+// boundary. `direction === "start"` advances forward to the start of the
+// next kept span; `"end"` retreats backward to the end of the previous
+// kept span. Returns null if there is no valid kept span on the chosen
+// side (i.e. the segment is entirely outside any kept range).
+const clipToKept = (originalSec, direction) => {
+  for (let i = 0; i < keptSegments.length; i++) {
+    const [s, e] = keptSegments[i];
+    if (originalSec < s) {
+      if (direction === "start") return s;
+      return i === 0 ? null : keptSegments[i - 1][1];
+    }
+    if (originalSec < e) return originalSec;
+  }
+  return direction === "end" ? keptSegments[keptSegments.length - 1][1] : null;
 };
 
 const captions = [];
 for (const seg of transcript) {
-  const startMap = remap(seg.startSec);
-  const endMap = remap(seg.endSec);
-  if (!startMap.kept && !endMap.kept) continue;
-  const startSec = +startMap.sec.toFixed(3);
-  const endSec = +endMap.sec.toFixed(3);
+  const startOrig = clipToKept(seg.startSec, "start");
+  const endOrig = clipToKept(seg.endSec, "end");
+  if (startOrig === null || endOrig === null) continue;
+  if (endOrig - startOrig < 0.4) continue;
+  const startSec = +remap(startOrig).toFixed(3);
+  const endSec = +remap(endOrig).toFixed(3);
   if (endSec - startSec < 0.4) continue;
 
   const key = `${seg.startSec}-${seg.endSec}`;

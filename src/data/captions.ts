@@ -42,6 +42,13 @@ export const captions: TriCaption[] = [
     "bn": "আমি জাপানি দক্ষতা পরীক্ষার উৎপাদন শেখাচ্ছি।"
   },
   {
+    "startSec": 24.968,
+    "endSec": 35.964,
+    "en": "It's been about two and a half years since I came to Japan. I am currently working as an IT engineer in Japan. Thank you for your cooperation.",
+    "jp": "日本に聞いては大体2年半になっています。今は日本でITエンジニアとして働いています。よろしくお願いします。",
+    "bn": "প্রায় দেড় বছর হয়ে গেছে আমি জাপানে এসেছি। আমি বর্তমানে জাপানে আইটি ইঞ্জিনিয়ার হিসেবে কাজ করছি। সাহায্যের জন্য ধন্যবাদ."
+  },
+  {
     "startSec": 38.588,
     "endSec": 42.354,
     "en": "Why did you decide to go to Japan?",
@@ -70,6 +77,13 @@ export const captions: TriCaption[] = [
     "bn": "তো এটা একটা কারণ এবং দিতি ওটি হচ্ছে জাপনের লাইফ স্টাইল তো এখানে সব কিছু নিয়ন তারণ মাফিক হয় এবং পরিষ্কার পরেছুনো সব ক�"
   },
   {
+    "startSec": 86.361,
+    "endSec": 91.475,
+    "en": "How do you feel before and after coming to Japan?",
+    "jp": "日本に来る前の印象と来てからの印象はいかがですか",
+    "bn": "জাপানে আসার আগে এবং পরে আপনার কেমন লাগছে?"
+  },
+  {
     "startSec": 92.173,
     "endSec": 105.823,
     "en": "As I said earlier, I have been working for a Japanese company in Bangladesh for about 5 years.",
@@ -84,6 +98,34 @@ export const captions: TriCaption[] = [
     "bn": "business culture এবং জাপানের কাল্চার সম্প্রকে কিছলা ধারণা ছিলো কিন্তু জত্তাই ধারণা থাবুক নেকনে আসলে এসে জিবদিলাত্রা যামন্টা হয় আ"
   },
   {
+    "startSec": 118.211,
+    "endSec": 125.239,
+    "en": "I don't know if I should be worried about the fact that Shatika was pregnant, but what do you think about this mystery?",
+    "jp": "シャチカが妊娠していたという事実を心配すべきかどうかはわかりませんが、この謎についてどう思いますか?",
+    "bn": "সত্তিকার যে উপলোগ থি সেটা আস্সলে চিন্তা হবনাথে এক টানোর রোগনি হয়ন তো এইদিমিস্টের কি মনে রখাও ছিছো"
+  },
+  {
+    "startSec": 127.036,
+    "endSec": 130.471,
+    "en": "What did you think was good about living in Japan?",
+    "jp": "日本に来てよかったと思った点は何ですか?",
+    "bn": "জাপানে বাস করা নিয়ে তুমি কি ভাব?"
+  },
+  {
+    "startSec": 130.471,
+    "endSec": 146.467,
+    "en": "First of all, what I want to say is that everything here is legal. So, in our country, the fact that in this case, it may be a little selfish, but in Japan, everything is legal. Even if the rules are a little difficult, everything is legal.",
+    "jp": "まず第一に、私が望むことは、ここにあるすべてが法的であるということです。 ですから、我が国では、このケースでは少し自滅するかもしれませんが、日本では、すべてが法的です。 ルールが少し難しい場合でも、全てが法的です。",
+    "bn": "প্রথমন্তো যেটা বলতে চাই সবকিছ এখনে নিয়ম মাফিক হয় আমাথের দেশে যেজিনিস্টা দেখা যায় যে এখিত্রে হয়তে একটো নিস্বি"
+  },
+  {
+    "startSec": 146.467,
+    "endSec": 150.724,
+    "en": "I think this is very positive for me.",
+    "jp": "私はこれが私にとって非常に肯定的だと思う。",
+    "bn": "মেনে এবং সকিক সমাই পালন করা হয়ে এই জনিষ্টা আমার কাছে বিস্ট পাজিটিক মনে হয়েছে"
+  },
+  {
     "startSec": 150.848,
     "endSec": 163.602,
     "en": "What is the problem in Japan? As an IT engineer, I came to Japan. In the beginning, I would say that even though I used to work in a Japanese company",
@@ -96,6 +138,34 @@ export const captions: TriCaption[] = [
     "en": "The working culture in Bangladesh and the working culture in Japan is a bit different. So, it may take some time to think about it and come to a conclusion.",
     "jp": "バングラデシュの労働文化と日本での労働文化は少し異なります。 そこで、それについて考え、結論に来るのに時間がかかることがあります。",
     "bn": "্বান্লেতেশে আসলে কাছকরার কাল্চার এবং জাপানে সলস্রি কাছকরার কাছকরার কাছকরার কাছকরার এটা আমি মনে কিছুতা আলাদা এজন্ন প"
+  },
+  {
+    "startSec": 178.261,
+    "endSec": 192.454,
+    "en": "What do you want to do in Japan in the future? I have been living in Japan for almost 2 years now. I have a family.",
+    "jp": "これから日本にしたいのは? 日本で2年近く暮らしています。 私は家族を持っています。",
+    "bn": "Kongo নিহন দে দো স্তে ইকিতাই তো মত্তেমাস কা? এখন যে তু জাপনে প্রায় দুই পছ্ছোর আরেই বছ্ছরের কাছে কাছে আমি আছি তো বর্তম�"
+  },
+  {
+    "startSec": 192.454,
+    "endSec": 196.696,
+    "en": "the Japanese law and also how",
+    "jp": "日本法と日本の法",
+    "bn": "্যাপনে নিয়ম কানন মিনে এবং সেই সাথে কি হাবে"
+  },
+  {
+    "startSec": 197.311,
+    "endSec": 209.886,
+    "en": "I would like to be a part of this society. I want to be a part of this society. I want to be a part of this society.",
+    "jp": "この社会の一員になりたいと思っています。 この社会の一員になりたい。 この社会の一員になりたい。",
+    "bn": "এই সসাইটিতে একিন বা এই সমাজে কি ভাবে আরো এক জন সদাশ্যি স্যাবে অবধান রাছিতে পারি সেরকোম ভাবে চলতে চাই সেই সাথে অবশোই"
+  },
+  {
+    "startSec": 209.886,
+    "endSec": 215.05,
+    "en": "to improve the quality of the work.",
+    "jp": "仕事の質を改善するために。",
+    "bn": "্যে যোক্কোতা কিমে কাজিনে কিই হবে আরো ইপ্রুফ্ক করা যে সেটা চানেজ করতে যে"
   },
   {
     "startSec": 217.635,
@@ -119,6 +189,13 @@ export const captions: TriCaption[] = [
     "bn": "তো এই কেত্রে প্রথন প্রথন হাপার একটি চেলেন্জিংগ মনে হোতে পারে কিন্তু বর্তমানে অনেক হালাল দুকান আছে এবং অনেক সুপার"
   },
   {
+    "startSec": 256.909,
+    "endSec": 263.441,
+    "en": "Do you have any advice for those who are studying Japanese in Bangladesh?",
+    "jp": "今バングラデシュで日本語を勉強している方々に何かアドバイスはありますか",
+    "bn": "যারা জাপানে পড়াশোনা করছেন তাদের জন্য আপনার কি কোন উপদেশ আছে?"
+  },
+  {
     "startSec": 263.441,
     "endSec": 279.422,
     "en": "In Bangladesh, my personal opinion is that JLPT N4 or JLPT N3 may not be a problem in Japan, but it is a mistake. Here, the main focus is communication.",
@@ -138,6 +215,13 @@ export const captions: TriCaption[] = [
     "en": "Practice it a lot so that when you come to Japan, you don't have any communication issues.",
     "jp": "日本に来ると、コミュニケーションの問題がなくても、たくさん練習しましょう。",
     "bn": "কাথা সুনে সেটা বেশে বেশে প্রাক্টিস করে যানো জাপানে আসার পর কোমিনিকেশন একে তেটামন কোন সমসা না হয়।"
+  },
+  {
+    "startSec": 299.593,
+    "endSec": 306.373,
+    "en": "Is there anything you would like to say to the Bangladeshi people who want to go to Japan?",
+    "jp": "日本へ行きたいと考えているバングラデシュの方々に何か言いたいことはありますか",
+    "bn": "বাংলাদেশের যে সমস্ত নাগরিক জাপানে যেতে চায়, তাদের কাছে কি আপনি কিছু বলতে চান?"
   },
   {
     "startSec": 306.606,
@@ -194,6 +278,20 @@ export const captions: TriCaption[] = [
     "en": "As far as I know, I have heard a lot about other agencies. I don't have any personal experience, but I have heard a lot from the students. I believe that the students are the target of most of the agencies.",
     "jp": "知っている限り、他の機関についてよく聞いています。 個人的な経験はありませんが、学生から多く聞いています。 ほとんどの機関のターゲットである学生は信じています。",
     "bn": "A কেত্রে আমি যততকো ভুষ্তে করেছি অন্যান্য এজিদি সম্পরকে যততকো সনেছি আমার বেক্তি গাতো যে তো ভিক্যতা নি কিন্তো যতত�"
+  },
+  {
+    "startSec": 406.358,
+    "endSec": 421.172,
+    "en": "to earn money. So, what happened after that? Did they follow the rules properly? Even if they got the job properly, this is not possible. Most of the agencies, I am not talking about everyone, some agencies are exceptional, but most of the agencies do not worry about this.",
+    "jp": "お金を稼ぐために。 それでは、その後に何が起こったのか? ルールをきちんと守っていましたか? きちんと仕事をしたとしても、これは不可能です。 ほとんどの代理店、私は皆について話していません、一部の代理店は例外的ですが、ほとんどの代理店はこのことを心配しません。",
+    "bn": "পার করতে পেরে টাকাই নিকাউন করা তো এরপরে আসার পরে আসলে কি হোলো তারা নিয়মকারণ ঠিকমত্ত মানুলো কিনা ঠিকমত্ত চাক্তে পে�"
+  },
+  {
+    "startSec": 421.172,
+    "endSec": 438.004,
+    "en": "So, what you are thinking now is that you will prepare in such a way that they can come and work in the working visa. So, with this target, in the same way, you will prepare and train. I am seeing this positively because your target is...",
+    "jp": "そこで、今は、就労ビザで働けるような方法で準備を進めるつもりです。 そのため、このターゲットを同じ方法で準備して訓練します。 目標は...",
+    "bn": "তো যেতো এখন আপনেরা যেতো চিন্তে আমনা করছেন যে এমন ফাবে প্রস্তুত করবেন যানো এসেই তারা ঵ার্কিংগ ভিসায়তে যানো কাশ ক�"
   },
   {
     "startSec": 455.932,
