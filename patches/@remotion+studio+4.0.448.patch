@@ -1,0 +1,125 @@
+diff --git a/node_modules/@remotion/studio/dist/components/ForceSpecificCursor.js b/node_modules/@remotion/studio/dist/components/ForceSpecificCursor.js
+index c915f57..7992f9f 100644
+--- a/node_modules/@remotion/studio/dist/components/ForceSpecificCursor.js
++++ b/node_modules/@remotion/studio/dist/components/ForceSpecificCursor.js
+@@ -39,7 +39,7 @@ const react_1 = __importStar(require("react"));
+ const ref = react_1.default.createRef();
+ const forceSpecificCursor = (cursor) => {
+     if (!ref.current) {
+-        throw new Error('ForceSpecificCursor is not mounted');
++        return;
+     }
+     ref.current.style.cursor = cursor;
+     ref.current.style.pointerEvents = 'auto';
+@@ -47,7 +47,7 @@ const forceSpecificCursor = (cursor) => {
+ exports.forceSpecificCursor = forceSpecificCursor;
+ const stopForcingSpecificCursor = () => {
+     if (!ref.current) {
+-        throw new Error('ForceSpecificCursor is not mounted');
++        return;
+     }
+     ref.current.style.cursor = '';
+     ref.current.style.pointerEvents = 'none';
+diff --git a/node_modules/@remotion/studio/dist/components/draw-peaks.js b/node_modules/@remotion/studio/dist/components/draw-peaks.js
+index ab518e6..117acfe 100644
+--- a/node_modules/@remotion/studio/dist/components/draw-peaks.js
++++ b/node_modules/@remotion/studio/dist/components/draw-peaks.js
+@@ -13,6 +13,8 @@ const drawBars = (canvas, peaks, color, volume, width) => {
+     ctx.clearRect(0, 0, w, height);
+     if (volume === 0)
+         return;
++    if (w <= 0 || height <= 0)
++        return;
+     const [r, g, b, a] = (0, parse_color_1.parseColor)(color);
+     const [cr, cg, cb, ca] = (0, parse_color_1.parseColor)(CLIPPING_COLOR);
+     const imageData = ctx.createImageData(w, height);
+diff --git a/node_modules/@remotion/studio/dist/esm/chunk-9s6mbe6g.js b/node_modules/@remotion/studio/dist/esm/chunk-9s6mbe6g.js
+index 9c5acbe..3d3b539 100644
+--- a/node_modules/@remotion/studio/dist/esm/chunk-9s6mbe6g.js
++++ b/node_modules/@remotion/studio/dist/esm/chunk-9s6mbe6g.js
+@@ -10208,14 +10208,14 @@ import { jsx as jsx84 } from "react/jsx-runtime";
+ var ref = React58.createRef();
+ var forceSpecificCursor = (cursor) => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = cursor;
+   ref.current.style.pointerEvents = "auto";
+ };
+ var stopForcingSpecificCursor = () => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = "";
+   ref.current.style.pointerEvents = "none";
+@@ -23190,6 +23190,8 @@ var drawBars = (canvas, peaks, color, volume, width) => {
+   ctx.clearRect(0, 0, w, height);
+   if (volume === 0)
+     return;
++  if (w <= 0 || height <= 0)
++    return;
+   const [r, g, b, a] = parseColor(color);
+   const [cr, cg, cb, ca] = parseColor(CLIPPING_COLOR);
+   const imageData = ctx.createImageData(w, height);
+diff --git a/node_modules/@remotion/studio/dist/esm/internals.mjs b/node_modules/@remotion/studio/dist/esm/internals.mjs
+index 4c3ff9b..a94c248 100644
+--- a/node_modules/@remotion/studio/dist/esm/internals.mjs
++++ b/node_modules/@remotion/studio/dist/esm/internals.mjs
+@@ -10227,14 +10227,14 @@ import { jsx as jsx84 } from "react/jsx-runtime";
+ var ref = React58.createRef();
+ var forceSpecificCursor = (cursor) => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = cursor;
+   ref.current.style.pointerEvents = "auto";
+ };
+ var stopForcingSpecificCursor = () => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = "";
+   ref.current.style.pointerEvents = "none";
+@@ -23209,6 +23209,8 @@ var drawBars = (canvas, peaks, color, volume, width) => {
+   ctx.clearRect(0, 0, w, height);
+   if (volume === 0)
+     return;
++  if (w <= 0 || height <= 0)
++    return;
+   const [r, g, b, a] = parseColor(color);
+   const [cr, cg, cb, ca] = parseColor(CLIPPING_COLOR);
+   const imageData = ctx.createImageData(w, height);
+diff --git a/node_modules/@remotion/studio/dist/esm/previewEntry.mjs b/node_modules/@remotion/studio/dist/esm/previewEntry.mjs
+index 989f62a..8fad3b4 100644
+--- a/node_modules/@remotion/studio/dist/esm/previewEntry.mjs
++++ b/node_modules/@remotion/studio/dist/esm/previewEntry.mjs
+@@ -10819,14 +10819,14 @@ import { jsx as jsx87 } from "react/jsx-runtime";
+ var ref = React60.createRef();
+ var forceSpecificCursor = (cursor) => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = cursor;
+   ref.current.style.pointerEvents = "auto";
+ };
+ var stopForcingSpecificCursor = () => {
+   if (!ref.current) {
+-    throw new Error("ForceSpecificCursor is not mounted");
++    return;
+   }
+   ref.current.style.cursor = "";
+   ref.current.style.pointerEvents = "none";
+@@ -23801,6 +23801,8 @@ var drawBars = (canvas, peaks, color, volume, width) => {
+   ctx.clearRect(0, 0, w, height);
+   if (volume === 0)
+     return;
++  if (w <= 0 || height <= 0)
++    return;
+   const [r, g, b, a] = parseColor(color);
+   const [cr, cg, cb, ca] = parseColor(CLIPPING_COLOR);
+   const imageData = ctx.createImageData(w, height);
