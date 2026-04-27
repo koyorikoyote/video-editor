@@ -136,9 +136,9 @@ const Invitation: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        gap: 18,
-        paddingLeft: 160,
-        paddingRight: 160,
+        gap: 22,
+        paddingLeft: 80,
+        paddingRight: 80,
         opacity,
         transform: `translateY(${rise}px)`,
       }}
@@ -148,7 +148,7 @@ const Invitation: React.FC = () => {
       <div
         style={{
           height: 3,
-          width: `${underline * 260}px`,
+          width: `${underline * 220}px`,
           background: `linear-gradient(90deg, transparent, ${theme.copper}, transparent)`,
           opacity: 0.9,
         }}
@@ -162,9 +162,9 @@ const Question: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const lines = [
-    { text: "日本で働きたい？", family: fonts.jp, color: theme.softWhite, weight: 700, size: 86 },
-    { text: "জাপানে কাজ করতে চান?", family: fonts.bn, color: theme.amber, weight: 700, size: 64 },
-    { text: "Dream of working in Japan?", family: fonts.en, color: theme.gold, weight: 600, size: 54 },
+    { text: "日本で働きたい？", family: fonts.jp, color: theme.softWhite, weight: 700, size: 64 },
+    { text: "জাপানে কাজ করতে চান?", family: fonts.bn, color: theme.amber, weight: 700, size: 50 },
+    { text: "Dream of working in Japan?", family: fonts.en, color: theme.gold, weight: 600, size: 42 },
   ];
   const outFade = interpolate(frame, [fps * 1.1, fps * 1.4], [1, 0], {
     extrapolateLeft: "clamp",
@@ -240,8 +240,8 @@ const Promise: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        gap: 16,
-        padding: "0 160px",
+        gap: 22,
+        padding: "0 80px",
         opacity: entrance,
         transform: `translateY(${(1 - entrance) * 10}px)`,
       }}
@@ -251,7 +251,7 @@ const Promise: React.FC = () => {
       <div
         style={{
           height: 4,
-          width: `${underline * 40}%`,
+          width: `${underline * 50}%`,
           background: theme.copper,
           borderRadius: 2,
           marginTop: 10,
@@ -264,28 +264,25 @@ const Promise: React.FC = () => {
 
 // ---------- shared trilingual components ----------
 
-// Small tagline: all three languages on one horizontal row, separated by dots.
+// Small tagline: stacked vertically (three languages won't fit on one
+// 1080-wide row with the wide letter-spacing they need to read at small size).
 const TaglineTrio: React.FC<{ trio: TriLine }> = ({ trio }) => (
   <div
     style={{
       display: "flex",
-      gap: 14,
+      flexDirection: "column",
+      gap: 4,
       alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap",
-      letterSpacing: 6,
-      textTransform: "uppercase",
+      textAlign: "center",
     }}
   >
-    <span style={{ fontFamily: fonts.jp, fontSize: 22, fontWeight: 700, color: theme.amber }}>
+    <span style={{ fontFamily: fonts.jp, fontSize: 22, fontWeight: 700, color: theme.amber, letterSpacing: 4 }}>
       {trio.jp}
     </span>
-    <span style={{ color: theme.copper, opacity: 0.7 }}>·</span>
-    <span style={{ fontFamily: fonts.bn, fontSize: 22, fontWeight: 700, color: theme.amber }}>
+    <span style={{ fontFamily: fonts.bn, fontSize: 22, fontWeight: 700, color: theme.amber, letterSpacing: 2 }}>
       {trio.bn}
     </span>
-    <span style={{ color: theme.copper, opacity: 0.7 }}>·</span>
-    <span style={{ fontFamily: fonts.en, fontSize: 22, fontWeight: 600, color: theme.amber, letterSpacing: 10 }}>
+    <span style={{ fontFamily: fonts.en, fontSize: 20, fontWeight: 600, color: theme.amber, letterSpacing: 8, textTransform: "uppercase" }}>
       {trio.en}
     </span>
   </div>
@@ -298,18 +295,18 @@ const HeroTrio: React.FC<{ trio: TriLine; accent: string }> = ({ trio, accent })
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: 10,
+      gap: 12,
       textAlign: "center",
     }}
   >
     <div
       style={{
         fontFamily: fonts.jp,
-        fontSize: 84,
+        fontSize: 60,
         fontWeight: 700,
         color: theme.softWhite,
         letterSpacing: 2,
-        lineHeight: 1.1,
+        lineHeight: 1.15,
         textShadow: "0 6px 30px rgba(0,0,0,0.5)",
       }}
     >
@@ -318,10 +315,10 @@ const HeroTrio: React.FC<{ trio: TriLine; accent: string }> = ({ trio, accent })
     <div
       style={{
         fontFamily: fonts.bn,
-        fontSize: 56,
+        fontSize: 44,
         fontWeight: 700,
         color: accent,
-        lineHeight: 1.15,
+        lineHeight: 1.2,
         textShadow: "0 4px 20px rgba(0,0,0,0.5)",
       }}
     >
@@ -330,11 +327,11 @@ const HeroTrio: React.FC<{ trio: TriLine; accent: string }> = ({ trio, accent })
     <div
       style={{
         fontFamily: fonts.en,
-        fontSize: 52,
+        fontSize: 40,
         fontWeight: 600,
         color: theme.gold,
         letterSpacing: -0.3,
-        lineHeight: 1.1,
+        lineHeight: 1.15,
         textShadow: "0 3px 16px rgba(0,0,0,0.5)",
       }}
     >

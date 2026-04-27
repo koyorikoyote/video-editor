@@ -14,15 +14,20 @@ export const theme = {
   softWhite: "#FDF8EF",  // cream-white for text on dark
 };
 
-export const VIDEO_WIDTH = 1920;
-export const VIDEO_HEIGHT = 1080;
+// 9:16 vertical, sized for mobile social feeds (Facebook / Instagram / TikTok
+// / Shorts). Native upload resolution at this aspect.
+export const VIDEO_WIDTH = 1080;
+export const VIDEO_HEIGHT = 1920;
 export const FPS = 30;
 
+// Generous vertical insets reserve room for the platform's bottom action bar
+// (like / comment / share, "Sponsored" pill) and top status / username chrome
+// on the Facebook mobile app.
 export const SAFE = {
-  actionX: 96,
-  actionY: 54,
-  titleX: 192,
-  titleY: 108,
+  actionX: 54,
+  actionY: 220,
+  titleX: 96,
+  titleY: 320,
 };
 
 export const HOOK_FRAMES = 5 * FPS;

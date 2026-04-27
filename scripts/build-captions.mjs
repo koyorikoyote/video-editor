@@ -6,9 +6,9 @@
 //
 // Per-segment data:
 //   - source = source-language text (jp or bn) from Whisper
-//   - english = Whisper translate task
-//   - third language (jp->bn or bn->jp) = optional override loaded from
-//     public/translations.json (produced by scripts/fill-third-lang.py)
+//   - english + third language (jp->bn or bn->jp) = both loaded from
+//     public/translations.json (produced by scripts/translate-nllb.mjs,
+//     which uses NLLB-200 via Transformers.js)
 //
 // Captions in removed-silence regions are clipped/skipped, since their
 // remapped duration would be near-zero.
@@ -84,7 +84,10 @@ for (const seg of transcript) {
     bn = (seg.source || "").trim();
     jp = (ovr.jp || "").trim();
   }
-  const en = (seg.english || "").trim();
+  // English now comes from NLLB (translations.json). Older transcript.json
+  // files written by the previous pipeline carried `seg.english` directly —
+  // keep it as a fallback so old data still renders.
+  const en = (ovr.en || seg.english || "").trim();
   if (!jp && !bn && !en) continue;
 
   captions.push({ startSec, endSec, en, jp, bn });
@@ -103,12 +106,13 @@ const ts = `export type TriCaption = {
 // (Whisper transcription of main-enhanced.mp4 in ORIGINAL-time seconds),
 // remapped to TRIMMED-time seconds via src/data/cutmap.ts.
 //
-// Third-language fields (jp for bn-source segments, bn for ja-source) come
-// from public/translations.json, written by scripts/fill-third-lang.py.
+// English + third-language fields (jp for bn-source segments, bn for
+// ja-source) come from public/translations.json, written by
+// scripts/translate-nllb.mjs (NLLB-200 via Transformers.js).
 //
 // To rebuild:
 //   python scripts/transcribe.py public/main-enhanced.mp4
-//   python scripts/fill-third-lang.py
+//   node scripts/translate-nllb.mjs
 //   node scripts/build-captions.mjs
 
 export const captions: TriCaption[] = ${JSON.stringify(captions, null, 2)};

@@ -48,57 +48,70 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          gap: 24,
+          gap: 28,
           paddingLeft: SAFE.titleX,
           paddingRight: SAFE.titleX,
           opacity: enter,
           transform: `translateY(${(1 - enter) * 12}px)`,
         }}
       >
-        {/* Trilingual subtitle row */}
+        {/* Brand mark — Imas Frontier */}
+        <div
+          style={{
+            fontFamily: fonts.en,
+            fontSize: 30,
+            fontWeight: 700,
+            color: theme.amber,
+            letterSpacing: 8,
+            textTransform: "uppercase",
+            textShadow: "0 2px 10px rgba(0,0,0,0.5)",
+          }}
+        >
+          Imas Frontier
+        </div>
+
+        {/* Trilingual subtitle stack — wraps for narrow vertical canvas */}
         <div
           style={{
             display: "flex",
-            gap: 14,
+            flexDirection: "column",
+            gap: 6,
             alignItems: "center",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            letterSpacing: 6,
-            textTransform: "uppercase",
           }}
         >
           <span
             style={{
               fontFamily: fonts.jp,
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: 700,
               color: theme.amber,
+              letterSpacing: 4,
             }}
           >
             日本での未来を
           </span>
-          <span style={{ color: theme.copper, opacity: 0.7 }}>·</span>
           <span
             style={{
               fontFamily: fonts.bn,
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: 700,
               color: theme.amber,
+              letterSpacing: 2,
             }}
           >
             জাপানে আপনার ভবিষ্যৎ
           </span>
-          <span style={{ color: theme.copper, opacity: 0.7 }}>·</span>
           <span
             style={{
               fontFamily: fonts.en,
               fontSize: 26,
               fontWeight: 600,
               color: theme.amber,
-              letterSpacing: 10,
+              letterSpacing: 8,
+              textTransform: "uppercase",
             }}
           >
-            YOUR FUTURE IN JAPAN
+            Your future in Japan
           </span>
         </div>
 
@@ -107,17 +120,19 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 10,
+            gap: 14,
             alignItems: "center",
+            textAlign: "center",
           }}
         >
           <div
             style={{
               fontFamily: fonts.jp,
-              fontSize: 96,
+              fontSize: 72,
               fontWeight: 700,
               color: theme.softWhite,
               letterSpacing: 2,
+              lineHeight: 1.15,
               textShadow: "0 8px 40px rgba(0,0,0,0.55)",
             }}
           >
@@ -126,9 +141,10 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
           <div
             style={{
               fontFamily: fonts.bn,
-              fontSize: 64,
+              fontSize: 56,
               fontWeight: 700,
               color: theme.amber,
+              lineHeight: 1.2,
               textShadow: "0 6px 30px rgba(0,0,0,0.5)",
             }}
           >
@@ -137,31 +153,34 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
           <div
             style={{
               fontFamily: fonts.en,
-              fontSize: 108,
+              fontSize: 86,
               fontWeight: 700,
               color: theme.gold,
               lineHeight: 1.0,
-              letterSpacing: -1,
+              letterSpacing: -0.5,
               textShadow: "0 8px 40px rgba(0,0,0,0.55)",
             }}
           >
-            Sign up today.
+            Sign up with
+            <br />
+            Imas Frontier
           </div>
         </div>
 
         {/* Restrained CTA button */}
         <div
           style={{
-            marginTop: 8,
-            padding: "18px 54px",
+            marginTop: 4,
+            padding: "20px 48px",
             background: theme.copper,
             color: theme.softWhite,
             fontFamily: fonts.en,
-            fontSize: 34,
+            fontSize: 32,
             fontWeight: 700,
             letterSpacing: 2,
             borderRadius: 10,
             textTransform: "uppercase",
+            textAlign: "center",
             boxShadow: `0 14px 40px rgba(197,123,58,0.35), inset 0 0 0 1px rgba(255,255,255,0.1)`,
           }}
         >
@@ -173,10 +192,11 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 6,
+            gap: 8,
             alignItems: "center",
-            opacity: 0.82,
-            marginTop: 4,
+            textAlign: "center",
+            opacity: 0.85,
+            marginTop: 6,
           }}
         >
           <div
@@ -185,7 +205,7 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
               fontSize: 22,
               fontWeight: 500,
               color: theme.softWhite,
-              letterSpacing: 2,
+              letterSpacing: 1.5,
             }}
           >
             ダッカ · JLPT対策 · ネイティブ講師 · 就職支援
@@ -196,7 +216,7 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
               fontSize: 22,
               fontWeight: 500,
               color: theme.softWhite,
-              letterSpacing: 1.5,
+              letterSpacing: 1,
             }}
           >
             ঢাকা · JLPT প্রস্তুতি · নেটিভ শিক্ষক · চাকরি স্থাপন
@@ -207,7 +227,7 @@ export const CallToAction: React.FC<Props> = ({ sfxVolume }) => {
               fontSize: 22,
               fontWeight: 500,
               color: theme.softWhite,
-              letterSpacing: 3,
+              letterSpacing: 2,
             }}
           >
             Dhaka · JLPT prep · Native teachers · Job placement

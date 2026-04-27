@@ -56,9 +56,10 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
   });
 
   const isBottom = caption.position !== "top";
+  // Inset captions well above/below the platform UI chrome on mobile feeds.
   const verticalStyle: React.CSSProperties = isBottom
-    ? { bottom: 60 }
-    : { top: 60 };
+    ? { bottom: SAFE.titleY }
+    : { top: SAFE.titleY };
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
@@ -79,7 +80,7 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
         <Line
           text={caption.jp}
           family={fonts.jp}
-          size={28}
+          size={36}
           weight={700}
           color={theme.gold}
           accent={theme.amber}
@@ -87,7 +88,7 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
         <Line
           text={caption.bn}
           family={fonts.bn}
-          size={26}
+          size={34}
           weight={700}
           color={theme.amber}
           accent={theme.copper}
@@ -95,7 +96,7 @@ const CaptionCard: React.FC<{ caption: TriCaption }> = ({ caption }) => {
         <Line
           text={caption.en}
           family={fonts.en}
-          size={22}
+          size={28}
           weight={600}
           color={theme.softWhite}
           accent={theme.copper}
@@ -128,7 +129,7 @@ const Line: React.FC<{
       borderRadius: 5,
       backdropFilter: "blur(6px)",
       textShadow: "0 2px 8px rgba(0,0,0,0.6)",
-      maxWidth: "82%",
+      maxWidth: "92%",
     }}
   >
     {text}

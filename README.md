@@ -1,246 +1,230 @@
 # Bangladesh → Japan promo (Remotion)
 
-A 16:9 promotional video for a Japanese-language school in Dhaka. Built with
-Remotion. The pipeline takes a raw interview MP4 and produces a polished
-edit with:
+Vertical 9:16 (1080×1920) promos for **Imas Frontier**, a Japanese-language
+school in Dhaka. Two compositions:
 
-- 5 s viral hook (trilingual: JP / BN / EN)
-- Main interview body — silence-stripped, denoised, level-controlled
-- 6 s CTA (trilingual)
-- Animated trilingual captions (JP / BN / EN) — transcribed from the actual
-  speech with Whisper (`large-v3`) + per-chunk language detection
+- **`JapanPromo`** — full-length edit (hook → silence-stripped interview body
+  → CTA), trilingual captions JP / BN / EN.
+- **`ImasFrontierViralCut`** — opt-in 60–90 s social cut. Ollama
+  (`gemma4:e4b`) curates the highest-hook Bengali testimonial segments,
+  ffmpeg concats them, intro/outro motion graphics + sign-up button on top.
+
+## Run order
+
+One-time setup (PowerShell):
+
+```powershell
+npm install
+winget install Gyan.FFmpeg                            # system ffmpeg has dynaudnorm/agate
+pip install faster-whisper transformers torch
+ollama pull gemma4:e4b                                # for the viral cut
+```
+
+### One-shot: `npm run pipeline`
+
+```powershell
+# Drop your raw interview MP4 into public/ first, then:
+npm run pipeline
+```
+
+That runs [scripts/run-pipeline.ps1](scripts/run-pipeline.ps1) which:
+
+1. Auto-discovers the source video in `public/` (largest video file that
+   isn't a pipeline-generated output).
+2. Auto-detects duration via ffmpeg and the silencedetect threshold via
+   `loudnorm input_thresh`.
+3. Runs steps 1 → 5a (`JapanPromo`) → 5b (`ImasFrontierViralCut`).
+
+Useful flags:
+
+```powershell
+npm run pipeline -- -Src "public/foo.MP4"        # explicit source override
+npm run pipeline -- -ViralOnly                   # re-run only the viral cut (5b)
+npm run pipeline -- -SkipViral                   # JapanPromo only
+npm run pipeline -- -SkipPolish -SkipTranscribe  # resume after editing captions
+npm run pipeline -- -NoRender                    # build assets, skip remotion render
+```
+
+(The `--` is required by npm so the flags reach the underlying PowerShell
+script instead of npm itself.)
+
+### Manual run order
+
+If you'd rather drive the steps yourself, here is what `npm run pipeline`
+does. Re-run only from the step you changed.
+
+PowerShell treats `<` and `>` as redirection operators, so do **not** paste
+literal `<src>` placeholders — set these two variables first and the rest
+of the block is copy-paste safe:
+
+```powershell
+# Set once at the top of your session:
+$SRC      = "public/07_AKMSHAMIUL ISLAM.MP4"   # path to the raw interview
+$DURATION = 501                                # source duration in seconds (see step 1a)
+```
+
+```powershell
+# 1a. (Optional) measure source duration if you don't already know it
+npx remotion ffmpeg -i "$SRC" -hide_banner 2>&1 | Select-String "Duration"
+
+# 1b. Measure loudness floor — note the input_thresh value in the JSON output
+npx remotion ffmpeg -i "$SRC" -map 0:a `
+  -af loudnorm=print_format=json -f null NUL
+
+# 1c. Detect silences using that threshold
+$THRESH = -36
+$LOG    = "$env:TEMP\silences.log"
+npx remotion ffmpeg -i "$SRC" -map 0:a `
+  -af "silencedetect=noise=$($THRESH)dB:d=0.5" -f null - 2> $LOG
+node scripts/parse-silences.mjs "$LOG" $DURATION
+
+# 2. Polish audio + strip silences  →  public/main-polished.mp4 + cutmap.ts
+node scripts/polish-audio.mjs
+
+# 2b. Whisper-input file (silences kept, audio enhanced)
+ffmpeg -y -i "$SRC" -map 0:v -map 0:a `
+  -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p -r 30 -c:a aac -b:a 192k `
+  -af "highpass=f=80,lowpass=f=14000,afftdn=nr=12,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,loudnorm=I=-14:TP=-1.5:LRA=8,alimiter=limit=0.89" `
+  public/main-enhanced.mp4
+
+# 3. Transcribe — large-v3 (detect + ja) + mozilla-ai/whisper-large-v3-bn (bn)
+$env:PYTHONIOENCODING = "utf-8"
+$env:WHISPER_MODEL    = "large-v3"
+$env:BN_MODEL         = "mozilla-ai/whisper-large-v3-bn"
+python scripts/transcribe.py public/main-enhanced.mp4
+
+# 4. Translate every segment via NLLB-200 (Transformers.js, direct ja↔bn)
+node scripts/translate-nllb.mjs
+
+# 5a. Full-length JapanPromo
+node scripts/build-captions.mjs
+npm run lint
+npx remotion render JapanPromo                         # → out/japan-promo.mp4
+
+# 5b. ImasFrontierViralCut (60–90 s social cut) — needs `ollama serve` running
+npm run build:viral                                    # pick-viral.mjs + build-viral-cut.mjs
+npm run render:viral                                   # → out/imas-frontier-viral.mp4
+```
+
+Both 5a and 5b are independent — run either, both, or neither, depending
+on what you need.
+
+First runs download models: `large-v3` ~3 GB, Bengali Whisper ~3 GB,
+NLLB-200 ~600 MB, gemma4:e4b ~3 GB. Cached after that.
 
 ## Daily commands
 
-```bash
-npm i              # install JS deps
-npm run dev        # Remotion Studio preview (http://localhost:3000)
-npm run lint       # eslint + tsc
-npx remotion render JapanPromo           # writes to out/japan-promo.mp4 (defaultOutName in calcMetadata.ts)
-```
-
-The `JapanPromo-SafeZone` composition shows 16:9 title-safe / action-safe
-guides as a dashed overlay — render it to verify nothing important sits
-outside the safe area.
-
-In Studio, use the volume sliders in the top-right of the preview canvas
-(Master / Voice / SFX) to balance audio live before rendering. Their
-default values come from the composition's `defaultProps` and apply to
-the final render too.
-
-## Re-running the pipeline on a new source video
-
-The full pipeline is six steps. Each is one shell command. Re-run only the
-steps after the one you changed.
-
-### Prerequisites (one-time)
-
-```bash
-# JS deps
-npm install
-
-# System ffmpeg (the Remotion-bundled ffmpeg lacks dynaudnorm, agate, etc.)
-# Install via your OS package manager. On Windows: winget install Gyan.FFmpeg
-
-# Python deps for transcription
-pip install faster-whisper argostranslate
-```
-
-### Step 1 — Drop the new source MP4 into `public/`
-
-```
-public/<your-source>.MP4
-```
-
-Edit any path constants in the scripts below if your filename differs from
-the default `07_AKMSHAMIUL ISLAM.MP4`.
-
-### Step 2 — Detect silences
-
-```bash
-# Measure loudness floor + silences (uses the Remotion-bundled ffmpeg)
-npx remotion ffmpeg -i "public/<your-source>.MP4" -map 0:a \
-  -af loudnorm=print_format=json -f null /dev/null
-# Note the input_thresh value, then:
-
-THRESH=-36   # use the input_thresh number from above
-npx remotion ffmpeg -i "public/<your-source>.MP4" -map 0:a \
-  -af "silencedetect=noise=${THRESH}dB:d=0.5" -f null - \
-  2>/tmp/silences.log
-
-# Parse the log into src/data/silences.ts
-node scripts/parse-silences.mjs /tmp/silences.log <total_duration_seconds>
-```
-
-`<total_duration_seconds>` is the source video duration (run
-`ffprobe -i "public/<your-source>.MP4"` to get it).
-
-### Step 3 — Polish: enhance audio + strip silences
-
-```bash
-# System ffmpeg required (uses agate / afftdn / anlmdn / dynaudnorm).
-# Reads src/data/silences.ts; writes:
-#   public/main-polished.mp4   (silence-stripped, denoised, levelled)
-#   src/data/cutmap.ts         (kept-segments + remapTime helper)
-node scripts/polish-audio.mjs
-```
-
-The audio chain:
-`agate -45 dB → afftdn nr=30 → anlmdn → highpass 95 / lowpass 11.5 kHz →
-dynaudnorm (consistent voice levels) → acompressor 3:1 → loudnorm -18 LUFS
-→ alimiter 0.83`
-
-Edit `scripts/polish-audio.mjs` to tune. The `-18 LUFS` target is
-calibrated for web-browser playback; raise to `-14` for YouTube.
-
-You'll also want to also produce a non-trimmed enhanced file for Whisper
-(silences kept so VAD can split language switches naturally):
-
-```bash
-ffmpeg -y -i "public/<your-source>.MP4" \
-  -map 0:v -map 0:a -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p \
-  -r 30 -c:a aac -b:a 192k \
-  -af "highpass=f=80,lowpass=f=14000,afftdn=nr=12,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,loudnorm=I=-14:TP=-1.5:LRA=8,alimiter=limit=0.89" \
-  public/main-enhanced.mp4
-```
-
-### Step 4 — Transcribe (Whisper `large-v3`)
-
-```bash
-# Per-VAD-chunk dual-pass: forces both ja and bn for each chunk and picks
-# whichever produced its expected script. Uses main-enhanced.mp4 (silences
-# kept) so VAD splits Q/A boundaries naturally.
-PYTHONIOENCODING=utf-8 WHISPER_MODEL=large-v3 \
-  python scripts/transcribe.py public/main-enhanced.mp4
-
-# Output: public/transcript.json
-#   [{ startSec, endSec, lang, source, english,
-#      ja_logprob, bn_logprob, ja_chars, bn_chars }]
-```
-
-Models:
-- `large-v3` (~3 GB): best Bengali quality. Slow on CPU (~45-60 min for
-  ~7 min of audio). **Recommended.**
-- `medium` (~1.5 GB): faster but Bengali transcription is poor.
-- `small` / `base` / `tiny`: not usable for non-English.
-
-Each chunk runs **three** model passes (force-ja transcribe + force-bn
-transcribe + translate in the chosen language), so wall time scales with
-chunk count, not just audio length.
-
-If a chunk's audio is mostly noise, both forced passes fail to produce
-script-language characters and the chunk is skipped — see the
-`no script` lines in the transcribe log.
-
-### Step 5 — Fill in the third-language translations (Argos)
-
-Whisper translates X → English only. The third language (e.g. JP for a
-Bengali-source segment) is filled in by Argos Translate, routing through
-English: BN → EN → JP, JP → EN → BN.
-
-```bash
-python scripts/fill-third-lang.py
-# Output: public/translations.json
-#   {"<startSec>-<endSec>": { "bn": "..." }} or {"...":{ "jp": "..." }}
-```
-
-First run downloads the Argos language packages (`en→ja`, `ja→en`,
-`en→bn`, `bn→en`) — ~200 MB total. Subsequent runs are instant.
-
-### Step 6 — Build captions + render
-
-```bash
-# Reads transcript.json + translations.json + cutmap.ts.
-# Remaps original-time to trimmed-time via cutmap.remapTime().
-# Writes src/data/captions.ts (consumed by src/components/Captions.tsx).
-node scripts/build-captions.mjs
-
-# Verify
+```powershell
+npm run dev                        # Studio at http://localhost:3000
 npm run lint                       # eslint + tsc
-npx remotion still JapanPromo --scale=0.5 --frame=300 /tmp/check.png
-
-# Render
+npm run build:viral                # re-curate the viral cut
 npx remotion render JapanPromo
+npm run render:viral
 ```
+
+`-SafeZone` variants of both compositions overlay mobile-safe-area guides —
+render them to verify nothing critical sits under platform UI overlays.
+
+## Viral cut module — env vars
+
+`pick-viral.mjs` is the only Ollama-driven step.
+
+| Var | Default | Purpose |
+|---|---|---|
+| `OLLAMA_MODEL` | `gemma4:e4b` | Model tag |
+| `OLLAMA_URL` | `http://localhost:11434` | Ollama host |
+| `OLLAMA_GPU_LAYERS` | `-1` (all) | `0` to force CPU |
+| `TARGET_MIN` / `TARGET_MAX` | `60` / `90` | Duration window (sec) |
+| `FFMPEG` | `ffmpeg` | ffmpeg binary path used by `build-viral-cut.mjs` |
+
+Disable the module without removing it: set `enabled: false` in the
+`ImasFrontierViralCut` defaultProps in `src/Root.tsx`.
+
+`public/viral-cut.json` is hand-editable between `pick-viral.mjs` and
+`build-viral-cut.mjs` — tweak the picks or order, then re-run only step 5b.
 
 ## Repo layout
 
 ```
 public/
-  <source>.MP4              # raw interview
-  main-enhanced.mp4         # full source, audio enhanced (silences kept) — Whisper input
-  main-polished.mp4         # silences stripped + aggressive denoise/leveling — composition input
-  transcript.json           # Whisper output (auto-generated)
-  translations.json         # Argos third-lang fills (auto-generated)
-  broll/manifest.json       # Pexels B-roll (currently unused, see "B-roll" below)
+  <source>.MP4              raw interview
+  main-enhanced.mp4         Whisper input (silences kept)
+  main-polished.mp4         JapanPromo input (silences stripped)
+  viral-cut.mp4             ImasFrontierViralCut input (concatenated picks)
+  transcript.json           Whisper output
+  translations.json         NLLB-200 en + third-lang fills
+  viral-cut.json            Ollama curator output (hand-editable)
+  broll/manifest.json       Pexels B-roll (currently unused)
 
 scripts/
-  parse-silences.mjs        # silencedetect log → src/data/silences.ts
-  polish-audio.mjs          # silences.ts → main-polished.mp4 + cutmap.ts
-  transcribe.py             # Whisper large-v3 → transcript.json
-  fill-third-lang.py        # Argos → translations.json
-  build-captions.mjs        # transcript + translations + cutmap → captions.ts
-  fetch-broll.mjs           # Pexels API → public/broll/
+  parse-silences.mjs        silencedetect log → src/data/silences.ts
+  polish-audio.mjs          silences.ts → main-polished.mp4 + cutmap.ts
+  transcribe.py             large-v3 (ja) + whisper-large-v3-bn (bn) → transcript.json
+  translate-nllb.mjs        NLLB-200 → translations.json
+  build-captions.mjs        transcript + translations + cutmap → captions.ts
+  pick-viral.mjs            Ollama gemma4:e4b → viral-cut.json
+  build-viral-cut.mjs       viral-cut.json + cutmap → viral-cut.mp4 + viralCut.ts
+  fetch-broll.mjs           Pexels API → public/broll/
 
 src/
-  Root.tsx                  # composition registration
-  Composition.tsx           # JapanPromo composition (Hook → Main → CTA)
-  fonts.ts                  # Google Fonts (Montserrat, Noto Sans JP, Noto Sans Bengali)
-  theme.ts                  # warm/professional palette + safe-zone constants
-  VolumeContext.tsx         # master volume context for Studio + render
-  calcMetadata.ts           # dynamic duration from cutmap.ts
+  Root.tsx, Composition.tsx, ViralComposition.tsx, calcMetadata.ts
+  theme.ts                  palette + 9:16 canvas + safe-zone constants
+  fonts.ts                  Montserrat / Noto Sans JP / Noto Sans Bengali
+  VolumeContext.tsx
   components/
-    ViralHook.tsx           # 5 s trilingual opening
-    MainSegment.tsx         # interview body with captions
-    CallToAction.tsx        # 6 s trilingual CTA
-    Captions.tsx            # animated trilingual caption renderer
-    ZoomVideo.tsx           # @remotion/media Video + Ken Burns
-    MotionGraphics.tsx      # WarmParticles + SoftGlint
-    SafeZone.tsx            # dashed 16:9 safe-area overlay
-    VolumeOverlay.tsx       # Studio-only live volume slider (hidden in render)
+    ViralHook.tsx           5 s opening (JapanPromo)
+    MainSegment.tsx         interview body + captions (JapanPromo)
+    CallToAction.tsx        6 s CTA (JapanPromo, Imas Frontier sign-up)
+    Captions.tsx            JapanPromo trilingual caption renderer
+    ViralIntro.tsx          1.8 s intro (ImasFrontierViralCut)
+    ViralOutro.tsx          4 s outro w/ sign-up button (ImasFrontierViralCut)
+    ViralCutCaptions.tsx    captions for the viral-cut timeline
+    AmbitionGraphics.tsx    drifting kanji + light streaks + ImasFrontier mark
+    ZoomVideo.tsx           Video + Ken Burns
+    MotionGraphics.tsx      WarmParticles + SoftGlint
+    SafeZone.tsx            dashed mobile-safe-area overlay
+    VolumeOverlay.tsx       Studio-only volume sliders
   data/
-    silences.ts             # silencedetect output (auto-generated)
-    cutmap.ts               # kept segments + remapTime() (auto-generated)
-    captions.ts             # trilingual caption track (auto-generated)
-    broll.ts, questions.ts  # B-roll cue authoring (currently inactive)
+    silences.ts, cutmap.ts, captions.ts            (auto-generated)
+    viralCut.ts                                    (auto-generated by build-viral-cut.mjs)
+    broll.ts, questions.ts                         (B-roll authoring, inactive)
 
 patches/
-  @remotion+studio+4.0.448.patch   # 4 sites: draw-peaks crash + ForceSpecificCursor mount
-                                   # auto-applied by postinstall (patch-package)
+  @remotion+studio+4.0.448.patch                   auto-applied by postinstall
 ```
 
-## B-roll (currently disabled)
+## File regeneration
 
-The B-roll system is wired but disabled in [MainSegment.tsx](src/components/MainSegment.tsx).
-To re-enable:
-
-1. `export PEXELS_API_KEY=...` ([sign up](https://www.pexels.com/api/)).
-2. `node scripts/fetch-broll.mjs "japanese office workers" "japanese business meeting" ...`
-3. Edit `MainSegment.tsx` to import + render the `<BRoll>` component, gated
-   by the cue list in `data/broll.ts` (which itself is built from
-   `data/questions.ts`).
-
-## Tweaking the edit
-
-- **Hook copy / styling**: `src/components/ViralHook.tsx`
-- **CTA copy / styling**: `src/components/CallToAction.tsx`
-- **Caption styling** (font sizes, colors, positions): `src/components/Captions.tsx`
-- **Caption text**: do not hand-edit `src/data/captions.ts` — re-run
-  `scripts/build-captions.mjs` instead. To override a translation,
-  edit `public/translations.json` and re-run the builder.
-- **Audio chain**: `scripts/polish-audio.mjs`. Re-run after edits.
-- **Volume defaults**: `defaultProps` in `src/Root.tsx`
-  (`masterVolume`, `voiceVolume`, `sfxVolume`).
-- **Safe-zone dimensions**: `SAFE` constants in `src/theme.ts`.
-
-## Knowing what each output file is for
-
-| File | Used by | When to regenerate |
+| File | Consumer | Regenerate when |
 |---|---|---|
-| `public/main-enhanced.mp4` | Whisper transcription | When the source MP4 changes |
-| `public/main-polished.mp4` | Composition (`<Video>`) | When silence detection changes |
-| `src/data/silences.ts` | `polish-audio.mjs` | When source audio changes |
-| `src/data/cutmap.ts` | `Composition.tsx`, `build-captions.mjs` | When silences.ts changes |
-| `public/transcript.json` | `build-captions.mjs` | When source speech changes |
-| `public/translations.json` | `build-captions.mjs` | When transcript.json changes |
-| `src/data/captions.ts` | `Captions.tsx` | When transcript or translations change |
+| `main-enhanced.mp4` | transcribe.py | source MP4 changes |
+| `main-polished.mp4` | JapanPromo `<Video>` | silences change |
+| `silences.ts` | polish-audio.mjs | source audio changes |
+| `cutmap.ts` | Composition.tsx, build-captions.mjs, build-viral-cut.mjs | silences.ts changes |
+| `transcript.json` | translate-nllb.mjs, build-captions.mjs, pick-viral.mjs | source speech changes |
+| `translations.json` | build-captions.mjs, pick-viral.mjs | transcript.json changes |
+| `captions.ts` | Captions.tsx | transcript or translations change |
+| `viral-cut.json` | build-viral-cut.mjs | re-curate; hand-edit OK |
+| `viral-cut.mp4` | ViralComposition `<Video>` | viral-cut.json changes |
+| `viralCut.ts` | ViralCutCaptions.tsx | viral-cut.json changes |
+
+## Tweaking
+
+| What | Where |
+|---|---|
+| JapanPromo hook | `src/components/ViralHook.tsx` |
+| JapanPromo CTA | `src/components/CallToAction.tsx` |
+| JapanPromo caption style | `src/components/Captions.tsx` |
+| Viral-cut intro / outro | `src/components/ViralIntro.tsx` / `ViralOutro.tsx` |
+| Viral-cut caption style | `src/components/ViralCutCaptions.tsx` |
+| Viral-cut motion graphics | `src/components/AmbitionGraphics.tsx` |
+| Caption text | re-run `build-captions.mjs` / `build-viral-cut.mjs`; override translations in `public/translations.json` |
+| Audio chain | `scripts/polish-audio.mjs` |
+| Volume defaults | `defaultProps` in `src/Root.tsx` |
+| Canvas / safe zone | `VIDEO_WIDTH`/`VIDEO_HEIGHT`/`SAFE` in `src/theme.ts` |
+
+## B-roll (disabled)
+
+Wired in [MainSegment.tsx](src/components/MainSegment.tsx) but commented out.
+To re-enable: `export PEXELS_API_KEY=...`, `node scripts/fetch-broll.mjs ...`,
+then mount `<BRoll>` gated by `data/broll.ts`.
