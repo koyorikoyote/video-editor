@@ -70,7 +70,8 @@ const BrollClip: React.FC<{ overlay: BrollOverlay }> = ({ overlay }) => {
         trimBefore={trimBeforeFrames}
         muted
         volume={0}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        objectFit="cover"
+        style={{ width: "100%", height: "100%" }}
       />
       {/* Subtle warm vignette so the cut between A and B-roll feels coherent
           with the rest of the edit. */}
