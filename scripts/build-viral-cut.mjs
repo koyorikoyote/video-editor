@@ -13,6 +13,7 @@
 
 import { exec } from "node:child_process";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { basename } from "node:path";
 import { promisify } from "node:util";
 
 const run = promisify(exec);
@@ -72,7 +73,10 @@ for (let i = 0; i < viral.segments.length; i++) {
       `-c:a aac -b:a 192k -movflags +faststart "${part}"`,
   );
 
-  concatList.push(`file '${part.replaceAll("\\", "/")}'`);
+  // ffmpeg's concat demuxer resolves `file '...'` entries relative to the
+  // directory of the concat-list file itself, so we write only the basename.
+  // Otherwise paths get doubled (e.g. public/.viral-tmp/public/.viral-tmp/part_000.mp4).
+  concatList.push(`file '${basename(part)}'`);
 
   captions.push({
     startSec: +timelineSec.toFixed(3),
