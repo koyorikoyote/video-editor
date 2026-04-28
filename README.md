@@ -296,20 +296,29 @@ What `plan-broll.mjs` does:
 
 - Probes each clip in `public/broll/` for duration via mediabunny.
 - Reads the post-polish caption timeline from `src/data/viralCut.ts`.
-- Sends both lists to `gemma4:e4b` with hard rules: each overlay 1.5–5 s,
-  ≥ 2.5 s gap between overlays, none in the first/last 3 s of the cut,
-  total coverage ≤ 40 % of the viral cut, no back-to-back repeats, prefer
-  visual-topical match (read from filenames).
-- Validates the response, drops anything that violates the rules, writes
-  `public/broll-plan.json` (hand-editable) and `src/data/brollPlan.ts`.
+- Places **exactly one** B-roll overlay at the **tail** of the viral cut,
+  ending ~0.5 s before the body finishes so it acts as a smooth visual
+  handoff into the CTA outro. Plays once — no looping, no mid-cut repeats.
+- If multiple clips are in `public/broll/`, asks `gemma4:e4b` to pick the
+  one whose visual content (read from the filename) best lands the closing
+  message and to choose a `clipStartSec` for the most striking moment.
+  With a single clip, Ollama is skipped entirely.
+- Writes `public/broll-plan.json` (hand-editable) and `src/data/brollPlan.ts`.
 
-Rendering: each overlay is a `<Video>` `<Sequence>` layered over the A-roll,
-**muted** so the speaker's voice keeps playing, with 0.4 s opacity
-crossfades on entry/exit. Captions stay on top. If `brollPlan` is empty
-(you didn't run the planner), the overlay layer renders nothing — composition
-is unaffected.
+Rendering: the overlay is a `<Video>` `<Sequence>` layered over the A-roll,
+**muted** so the speaker's voice keeps playing uninterrupted (audio
+continuity with the captions). 0.4 s opacity crossfades on entry/exit.
+Captions stay on top. If `brollPlan` is empty (you didn't run the
+planner), the overlay layer renders nothing — composition is unaffected.
+
+Tuning env vars:
+
+| Var | Default | Purpose |
+|---|---|---|
+| `BROLL_TAIL_SEC` | `4.5` | Target tail overlay duration (sec) |
+| `BROLL_TAIL_BUFFER_SEC` | `0.5` | Gap between overlay end and body end (sec) |
 
 Naming tip: name your clips after what they show (e.g.
-`dhaka-classroom.mp4`, `tokyo-station.mp4`, `students-laughing.mp4`). The
-planner reads only the filename to judge topical fit, so descriptive names
-land more accurate placements.
+`dhaka-classroom.mp4`, `tokyo-station.mp4`, `students-arriving-japan.mp4`).
+The planner reads only the filename to judge topical fit when picking
+between multiple clips, so descriptive names land more accurate selections.

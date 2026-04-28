@@ -3,24 +3,25 @@
 //   - public/broll/*.{mp4,mov,m4v,webm}   user-uploaded clips
 //   - src/data/viralCut.ts                post-polish caption timeline
 //
-// Asks Ollama (gemma4:e4b) to lay B-roll overlays over the viral cut, then
-// emits:
+// Places EXACTLY ONE B-roll overlay at the tail of the viral cut, sized
+// so it ends just before the body finishes — letting it act as a smooth
+// visual handoff into the CTA outro. Plays once, no looping, no mid-cut
+// repetition. Updates:
 //   - public/broll-plan.json     hand-editable plan
 //   - src/data/brollPlan.ts      what the composition reads
 //
-// Constraints handed to the model:
-//   - each overlay 1.5-5.0 s long
-//   - >= 2.5 s gap between overlays (no back-to-back)
-//   - no overlay in the first or last 3 s of the viral cut
-//   - total B-roll coverage <= 40% of the viral cut duration
-//   - prefer clips whose visual matches the caption topic
-//   - vary clip choices, no repeats unless variety is exhausted
+// If multiple clips are available, Ollama (gemma4:e4b) picks the single
+// most contextually-fitting one for the closing moment based on the
+// surrounding captions and the clip filenames. With one clip in
+// public/broll/, Ollama is skipped entirely.
 //
 // Env (same vars as the other Ollama-driven scripts):
 //   OLLAMA_MODEL=gemma4:e4b   OLLAMA_URL=http://localhost:11434
 //   OLLAMA_GPU_LAYERS=-1      OLLAMA_TIMEOUT_MS=0
+//   BROLL_TAIL_SEC            override target tail duration (sec)
+//   BROLL_TAIL_BUFFER_SEC     gap between overlay end and body end (sec)
 //
-// Audio of B-roll clips is muted at render time so the speaker keeps talking.
+// Audio of B-roll is muted at render time so the speaker keeps talking.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { request as httpRequest } from "node:http";
@@ -38,6 +39,11 @@ const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
 const MODEL = process.env.OLLAMA_MODEL || "gemma4:e4b";
 const NUM_GPU = Number(process.env.OLLAMA_GPU_LAYERS ?? -1);
 const TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 0);
+
+// Tail-only behaviour. Default ~4.5s, end 0.5s before body ends so the
+// CTA outro's crossfade has clean handoff room.
+const TAIL_TARGET_SEC = Number(process.env.BROLL_TAIL_SEC || 4.5);
+const TAIL_END_BUFFER_SEC = Number(process.env.BROLL_TAIL_BUFFER_SEC || 0.5);
 
 const VIDEO_EXTS = new Set([".mp4", ".mov", ".m4v", ".webm", ".mkv"]);
 
@@ -122,7 +128,7 @@ if (clipMeta.length === 0) {
 }
 
 // ---------------------------------------------------------------------------
-// Pull captions out of viralCut.ts (it's plain TS-as-JSON)
+// Pull captions + duration out of viralCut.ts
 // ---------------------------------------------------------------------------
 const tsText = await readFile(VIRAL_TS, "utf8");
 const arrMatch = tsText.match(/viralCutCaptions[^=]*=\s*(\[[\s\S]*?\]);/);
@@ -141,174 +147,167 @@ if (captions.length === 0) {
 console.log(`viral cut: ${totalSec}s, ${captions.length} captions`);
 
 // ---------------------------------------------------------------------------
-// Build the prompt
+// Compute the tail overlay window
 // ---------------------------------------------------------------------------
-const captionTable = captions
-  .map(
-    (c, i) =>
-      `idx=${i} t=${c.startSec}-${c.endSec}s  bn="${c.bn}"  en="${c.en}"`,
-  )
-  .join("\n");
+const tailEnd = +(totalSec - TAIL_END_BUFFER_SEC).toFixed(3);
+// Start can't go before the safe entry zone (3s) and shouldn't last longer
+// than the cut itself permits. Clamp tail length accordingly.
+const earliestStart = 3.0;
+const maxAvailable = Math.max(0, tailEnd - earliestStart);
+const tailDur = Math.max(2.0, Math.min(TAIL_TARGET_SEC, maxAvailable));
+const tailStart = +(tailEnd - tailDur).toFixed(3);
 
-const clipTable = clipMeta
-  .map((c) => `  - "broll/${c.name}"  duration=${c.durationSec}s`)
-  .join("\n");
-
-const systemPrompt = `You are a senior social-media video editor. You're producing a 9:16 promo for "Imas Frontier" — a Japanese-language school in Dhaka, Bangladesh whose students learn Japanese and move to Japan to live and work.
-
-You are given:
-  1. A list of available user-uploaded B-roll clips (file path + duration).
-  2. The caption timeline of the main viral cut (Bengali source + English translation, with timestamps).
-
-Your job: design a B-roll overlay plan that adds visual variety to the speaker shot at moments where the topic of the caption matches what the clip likely depicts. Constraints (HARD):
-
-  - Each overlay is 1.5 to 5.0 seconds long.
-  - There must be at LEAST 2.5 seconds of gap between consecutive overlays.
-  - NO overlay may start before t=3.0s or end after t=${(totalSec - 3).toFixed(2)}s.
-  - Total overlay coverage (sum of overlay durations) must be <= ${(totalSec * 0.4).toFixed(1)}s (40% of the viral cut).
-  - clipStartSec must be >= 0 and clipStartSec + (endSec - startSec) <= the clip's duration.
-  - Prefer visual-topical match: pick a clip whose likely subject (read it from the filename) matches the caption topic at that moment.
-  - VARY clip choices. Never use the same clip twice in a row. Spread usage across all available clips.
-  - Quality over quantity: 3-7 well-placed overlays are better than 10 noisy ones.
-
-Output ONLY a JSON object of this exact shape, no prose:
-{
-  "overlays": [
-    { "startSec": <float>, "endSec": <float>, "clipFile": "broll/<filename>", "clipStartSec": <float>, "reason": "<short>" }
-  ]
-}
-
-clipFile must include the "broll/" prefix exactly as listed.`;
-
-const userPrompt = `Available B-roll clips:
-${clipTable}
-
-Viral cut caption timeline (total ${totalSec}s):
-${captionTable}
-
-Return the JSON now.`;
-
-console.log(`\nasking ${MODEL} (num_gpu=${NUM_GPU === -1 ? "all" : NUM_GPU}) ...`);
-const t0 = Date.now();
-
-const res = await ollamaPost(`${OLLAMA_URL}/api/chat`, JSON.stringify({
-  model: MODEL,
-  stream: false,
-  format: "json",
-  options: { temperature: 0.4, num_ctx: 8192, num_gpu: NUM_GPU },
-  keep_alive: "10m",
-  messages: [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: userPrompt },
-  ],
-}));
-
-if (!res.ok) {
-  console.error(`Ollama HTTP ${res.status}: ${res.text}`);
-  process.exit(1);
-}
-
-let parsed;
-try {
-  const wrapper = JSON.parse(res.text);
-  parsed = JSON.parse(wrapper.message?.content || "{}");
-} catch (e) {
-  console.error(`Bad JSON from model: ${e.message}`);
-  console.error(`Raw: ${res.text.slice(0, 500)}`);
-  process.exit(1);
-}
-console.log(`  Ollama replied in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
-
-if (!Array.isArray(parsed.overlays)) {
-  console.error("Model returned no overlays array. Raw:", JSON.stringify(parsed));
-  process.exit(1);
-}
-
-// ---------------------------------------------------------------------------
-// Validate + sanitize
-// ---------------------------------------------------------------------------
-const clipByPath = new Map(clipMeta.map((c) => [`broll/${c.name}`, c]));
-const validated = [];
-let lastEnd = -Infinity;
-let totalCoverage = 0;
-
-const sorted = [...parsed.overlays].sort(
-  (a, b) => Number(a.startSec ?? 0) - Number(b.startSec ?? 0),
-);
-
-for (const o of sorted) {
-  const startSec = Number(o.startSec);
-  const endSec = Number(o.endSec);
-  const clipFile = String(o.clipFile || "");
-  const clipStartSec = Number(o.clipStartSec || 0);
-
-  if (!Number.isFinite(startSec) || !Number.isFinite(endSec)) continue;
-  const dur = endSec - startSec;
-  if (dur < 1.0) {
-    console.warn(`  reject ${clipFile} @${startSec}: too short (${dur.toFixed(2)}s)`);
-    continue;
-  }
-  if (dur > 6.0) {
-    console.warn(`  reject ${clipFile} @${startSec}: too long (${dur.toFixed(2)}s)`);
-    continue;
-  }
-  if (startSec < 3.0 || endSec > totalSec - 3.0) {
-    console.warn(`  reject ${clipFile} @${startSec}: outside [3, ${(totalSec - 3).toFixed(1)}s] safe window`);
-    continue;
-  }
-  if (startSec - lastEnd < 2.0) {
-    console.warn(`  reject ${clipFile} @${startSec}: gap from previous overlay too small`);
-    continue;
-  }
-  const meta = clipByPath.get(clipFile);
-  if (!meta) {
-    console.warn(`  reject unknown clipFile: ${clipFile}`);
-    continue;
-  }
-  if (clipStartSec < 0 || clipStartSec + dur > meta.durationSec + 0.05) {
-    console.warn(`  reject ${clipFile} @${startSec}: clipStartSec ${clipStartSec} + dur ${dur} exceeds clip length ${meta.durationSec}`);
-    continue;
-  }
-
-  validated.push({
-    startSec: +startSec.toFixed(3),
-    endSec: +endSec.toFixed(3),
-    clipFile,
-    clipStartSec: +clipStartSec.toFixed(3),
-    reason: typeof o.reason === "string" ? o.reason : "",
-  });
-  lastEnd = endSec;
-  totalCoverage += dur;
-}
-
-const maxCoverage = totalSec * 0.4;
-if (totalCoverage > maxCoverage) {
-  console.warn(
-    `  ! total coverage ${totalCoverage.toFixed(1)}s exceeds 40% cap (${maxCoverage.toFixed(1)}s). Trimming from the end.`,
+if (tailDur < 2.0) {
+  console.error(
+    `viral cut is too short (${totalSec}s) to fit a tail overlay. Aborting.`,
   );
-  while (validated.length > 0 && totalCoverage > maxCoverage) {
-    const dropped = validated.pop();
-    totalCoverage -= dropped.endSec - dropped.startSec;
-  }
+  process.exit(1);
 }
 
 console.log(
-  `\n${validated.length} overlay(s) validated, ${totalCoverage.toFixed(1)}s coverage (${((totalCoverage / totalSec) * 100).toFixed(1)}% of viral cut)`,
+  `tail overlay window: ${tailStart}s -> ${tailEnd}s  (${tailDur.toFixed(2)}s, ends ${TAIL_END_BUFFER_SEC}s before body)`,
 );
-for (const o of validated) {
-  console.log(
-    `  ${o.startSec.toFixed(2)}-${o.endSec.toFixed(2)}s  ${o.clipFile} @${o.clipStartSec.toFixed(2)}  ${o.reason ? "// " + o.reason : ""}`,
+
+// Captions overlapping the tail window — used for context when picking the clip
+const tailCaptions = captions.filter(
+  (c) => c.endSec > tailStart && c.startSec < tailEnd,
+);
+const tailContext = tailCaptions
+  .map((c) => `  bn: "${c.bn}"\n  en: "${c.en}"`)
+  .join("\n\n");
+
+// ---------------------------------------------------------------------------
+// Pick the single most-fitting clip
+// ---------------------------------------------------------------------------
+let chosen;
+let chosenReason;
+let chosenClipStart = 0;
+
+if (clipMeta.length === 1) {
+  chosen = clipMeta[0];
+  chosenReason = "Only one B-roll clip available; using it for the tail handoff into the CTA.";
+  console.log(`only one clip — skipping Ollama, using ${chosen.name}`);
+} else {
+  console.log(`\nasking ${MODEL} (num_gpu=${NUM_GPU === -1 ? "all" : NUM_GPU}) to pick the best tail clip ...`);
+
+  const clipTable = clipMeta
+    .map((c) => `  - "broll/${c.name}"  duration=${c.durationSec}s`)
+    .join("\n");
+
+  const systemPrompt = `You are a senior social-media video editor. You're producing a 9:16 promo for "Imas Frontier" — a Japanese-language school in Dhaka, Bangladesh whose students learn Japanese and move to Japan to live and work.
+
+You will be given:
+  1. A list of available user-uploaded B-roll clips (file path + duration).
+  2. The captions playing during the FINAL ${tailDur.toFixed(2)} seconds of the viral cut, just before the CTA outro takes over.
+
+Pick the SINGLE B-roll clip whose visual content (read from the filename) best provides a closing visual handoff — something that emotionally lands the message and bridges into a "sign up with Imas Frontier" call-to-action. Prefer footage of life in Japan, students arriving, daily routines, ambition, transition.
+
+Also pick a "clipStartSec" — the offset within that clip where playback should begin. Pick the most visually striking moment. Default to 0 if unsure.
+
+Output ONLY this JSON shape:
+{ "clipFile": "broll/<filename>", "clipStartSec": <float>, "reason": "<short>" }
+
+clipFile must include the "broll/" prefix exactly as listed.`;
+
+  const userPrompt = `Available B-roll clips:
+${clipTable}
+
+Final ${tailDur.toFixed(2)}s of viral cut (this is what the speaker is saying right before the CTA):
+${tailContext || "  (no captions in tail window)"}
+
+Return the JSON now.`;
+
+  let res;
+  try {
+    res = await ollamaPost(`${OLLAMA_URL}/api/chat`, JSON.stringify({
+      model: MODEL,
+      stream: false,
+      format: "json",
+      options: { temperature: 0.3, num_ctx: 4096, num_gpu: NUM_GPU },
+      keep_alive: "10m",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }));
+  } catch (e) {
+    console.warn(`  Ollama call failed (${e.message}) — falling back to first clip`);
+    chosen = clipMeta[0];
+    chosenReason = `Ollama unavailable; defaulted to first clip.`;
+  }
+
+  if (!chosen) {
+    if (!res?.ok) {
+      console.warn(`  Ollama HTTP ${res?.status} — falling back to first clip`);
+      chosen = clipMeta[0];
+      chosenReason = "Ollama returned non-OK; defaulted to first clip.";
+    } else {
+      let parsed;
+      try {
+        const wrapper = JSON.parse(res.text);
+        parsed = JSON.parse(wrapper.message?.content || "{}");
+      } catch (e) {
+        console.warn(`  bad JSON from model (${e.message}) — falling back to first clip`);
+        chosen = clipMeta[0];
+        chosenReason = "Ollama returned non-JSON; defaulted to first clip.";
+      }
+      if (parsed) {
+        const wantPath = String(parsed.clipFile || "");
+        const wantName = wantPath.replace(/^broll\//, "");
+        const match = clipMeta.find((c) => c.name === wantName);
+        if (!match) {
+          console.warn(`  model picked unknown clip "${wantPath}" — falling back to first clip`);
+          chosen = clipMeta[0];
+          chosenReason = "Model picked an unknown clip; defaulted to first.";
+        } else {
+          chosen = match;
+          chosenReason = String(parsed.reason || "Selected by model for tail handoff.");
+          chosenClipStart = Number(parsed.clipStartSec) || 0;
+        }
+      }
+    }
+  }
+}
+
+// Validate clipStartSec + clip length can satisfy tail duration.
+if (chosen.durationSec < tailDur) {
+  console.warn(
+    `  ! clip ${chosen.name} (${chosen.durationSec}s) is shorter than tail ${tailDur.toFixed(2)}s — clip will end early; visible region will be the clip duration only.`,
+  );
+}
+if (chosenClipStart < 0) chosenClipStart = 0;
+if (chosenClipStart + tailDur > chosen.durationSec) {
+  // Shift start back so the play window fits within the clip.
+  chosenClipStart = Math.max(0, chosen.durationSec - tailDur);
+  console.warn(
+    `  clipStartSec adjusted to ${chosenClipStart.toFixed(2)} so it fits within the clip`,
   );
 }
 
+const overlay = {
+  startSec: tailStart,
+  endSec: tailEnd,
+  clipFile: `broll/${chosen.name}`,
+  clipStartSec: +chosenClipStart.toFixed(3),
+  reason: chosenReason,
+};
+
+console.log(
+  `\nplanned 1 tail overlay: ${overlay.startSec}s-${overlay.endSec}s  ${overlay.clipFile} @${overlay.clipStartSec}s`,
+);
+console.log(`  // ${overlay.reason}`);
+
+// ---------------------------------------------------------------------------
+// Write outputs
+// ---------------------------------------------------------------------------
 await writeFile(
   OUT_JSON,
   JSON.stringify(
     {
-      model: MODEL,
+      model: clipMeta.length === 1 ? "(skipped, single-clip)" : MODEL,
       viralCutDurationSec: totalSec,
-      totalCoverageSec: +totalCoverage.toFixed(2),
-      overlays: validated,
+      totalCoverageSec: +(overlay.endSec - overlay.startSec).toFixed(2),
+      overlays: [overlay],
     },
     null,
     2,
@@ -324,12 +323,13 @@ const tsBody = `export type BrollOverlay = {
   reason?: string;
 };
 
-// Auto-generated by scripts/plan-broll.mjs (Ollama-curated B-roll plan).
-// Empty array = no B-roll layer rendered. Drop your own clips into
-// public/broll/ and re-run \`npm run plan:broll\` (or pass -WithBroll to
-// the pipeline) to populate this file.
+// Auto-generated by scripts/plan-broll.mjs (single tail overlay).
+// One B-roll clip plays once at the end of the viral cut, ending
+// ${TAIL_END_BUFFER_SEC.toFixed(2)}s before the body finishes so it acts as a
+// smooth visual handoff into the CTA outro. To regenerate, re-run
+// \`npm run plan:broll\` (or pass -WithBroll to the pipeline).
 
-export const brollPlan: BrollOverlay[] = ${JSON.stringify(validated, null, 2)};
+export const brollPlan: BrollOverlay[] = ${JSON.stringify([overlay], null, 2)};
 `;
 
 await writeFile(OUT_TS, tsBody, "utf8");
