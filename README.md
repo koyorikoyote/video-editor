@@ -40,13 +40,34 @@ Useful flags:
 ```powershell
 npm run pipeline -- -Src "public/foo.MP4"        # explicit source override
 npm run pipeline -- -ViralOnly                   # re-run only the viral cut (5b)
-npm run pipeline -- -SkipViral                   # JapanPromo only
-npm run pipeline -- -SkipPolish -SkipTranscribe  # resume after editing captions
+npm run pipeline -- -SkipViral                   # JapanPromo only (5a)
 npm run pipeline -- -NoRender                    # build assets, skip remotion render
 ```
 
-(The `--` is required by npm so the flags reach the underlying PowerShell
-script instead of npm itself.)
+Resume from step 5 (reuse existing artifacts on disk — useful when you've
+tweaked component code, captions, or the viral-cut picks and just want to
+re-render):
+
+```powershell
+npm run pipeline -- -RenderOnly                  # skip 1-4, run 5a + 5b
+npm run pipeline -- -RenderOnly -SkipViral       # skip 1-4, run only 5a
+npm run pipeline -- -RenderOnly -SkipJapanPromo  # skip 1-4, run only 5b (= -ViralOnly)
+```
+
+Pick-and-choose individual steps to skip if you know exactly what changed:
+
+```powershell
+npm run pipeline -- -SkipSilenceDetect -SkipPolish -SkipEnhance `
+                    -SkipTranscribe -SkipTranslate                # equiv. to -RenderOnly
+npm run pipeline -- -SkipPolish -SkipTranscribe                    # resume mid-run
+```
+
+Each skipped step prints `-- Step N -- xxx  (skipped)` so it's clear what
+was reused vs. re-run.
+
+(The `--` separator is required by npm so the flags reach the underlying
+PowerShell script instead of npm itself. `-RenderOnly` does **not** need
+`-Src` — the source video is only consulted by the upstream probes.)
 
 ### Manual run order
 

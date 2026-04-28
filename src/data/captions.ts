@@ -11,293 +11,294 @@ export type TriCaption = {
 // (Whisper transcription of main-enhanced.mp4 in ORIGINAL-time seconds),
 // remapped to TRIMMED-time seconds via src/data/cutmap.ts.
 //
-// Third-language fields (jp for bn-source segments, bn for ja-source) come
-// from public/translations.json, written by scripts/fill-third-lang.py.
+// English + third-language fields (jp for bn-source segments, bn for
+// ja-source) come from public/translations.json, written by
+// scripts/translate-nllb.mjs (NLLB-200 via Transformers.js).
 //
 // To rebuild:
 //   python scripts/transcribe.py public/main-enhanced.mp4
-//   python scripts/fill-third-lang.py
+//   node scripts/translate-nllb.mjs
 //   node scripts/build-captions.mjs
 
 export const captions: TriCaption[] = [
   {
     "startSec": 0,
     "endSec": 1.68,
-    "en": "Hi, I am Pooja.",
-    "jp": "",
-    "bn": "হাই কেছে দেখিসে"
+    "en": "Yes, I did, I did not!",
+    "jp": "違うよ!",
+    "bn": "হয়! হয়চে, নেই নিসে!"
   },
   {
-    "startSec": 2.277,
-    "endSec": 19.31,
-    "en": "Let's start with a self-introduction. Nice to meet you. My name is Samuel. I'm in my early 30s.",
-    "jp": "ではサミュールさんよろしくお願いしますまず自己紹介からお願いできますか初めましてサミュールと申します年齢は30代前半です",
-    "bn": "চল নিজে নিজে নিজে থেকে শুরু করি। দেখা হয়ে ভালো লাগলো। আমার নাম স্যামুয়েল। আমি ৩০ মিনিটের মধ্যে আছি।"
+    "startSec": 3.472,
+    "endSec": 20.784,
+    "en": "So, I'd like to say hello to you, Mr. Samuel, and I'd like to introduce myself to you, Mr. Samuel, and I'd like to say that I'm in my early 30s.",
+    "jp": "ではサミュルさんよろしくお願いしますまず自己紹介からお願いできますか初めましてサミュルと申します年齢は30代前半です",
+    "bn": "এখন, স্যামুয়েল, আমি আপনাকে স্বাগত জানাই, আমি আপনাকে আমার পরিচয় জানাতে চাই, স্যামুয়েল, আমি আপনাকে স্বাগত জানাই, আমি আপনাকে বলতে চাই, আমি আপনার ৩০ এর দশকের মাঝামাঝি বয়সী।"
   },
   {
-    "startSec": 19.31,
-    "endSec": 24.968,
-    "en": "I am learning the production of the Japanese ability test.",
+    "startSec": 20.784,
+    "endSec": 26.864,
+    "en": "I'm learning to do the Japanese language test.",
     "jp": "日本語能力試験減算を習得しています",
-    "bn": "আমি জাপানি দক্ষতা পরীক্ষার উৎপাদন শেখাচ্ছি।"
+    "bn": "আমি জাপানি ভাষার দক্ষতা পরীক্ষা হ্রাস করতে শিখেছি।"
   },
   {
-    "startSec": 24.968,
-    "endSec": 35.964,
-    "en": "It's been about two and a half years since I came to Japan. I am currently working as an IT engineer in Japan. Thank you for your cooperation.",
-    "jp": "日本に聞いては大体2年半になっています。今は日本でITエンジニアとして働いています。よろしくお願いします。",
-    "bn": "প্রায় দেড় বছর হয়ে গেছে আমি জাপানে এসেছি। আমি বর্তমানে জাপানে আইটি ইঞ্জিনিয়ার হিসেবে কাজ করছি। সাহায্যের জন্য ধন্যবাদ."
+    "startSec": 27.152,
+    "endSec": 38.704,
+    "en": "I've been in Japan for about two and a half years, and I'm now working as an IT engineer in Japan.",
+    "jp": "日本に聞いては大体2年半になっています今は日本でITエンジニアとして働いていますよろしくお願いします",
+    "bn": "আমি জাপানে প্রায় আড়াই বছর ধরে আছি, এবং এখন আমি জাপানে আইটি ইঞ্জিনিয়ার হিসেবে কাজ করছি।"
   },
   {
-    "startSec": 38.588,
-    "endSec": 42.354,
-    "en": "Why did you decide to go to Japan?",
+    "startSec": 41.968,
+    "endSec": 45.872,
+    "en": "What was the reason I wanted to go to Japan?",
     "jp": "日本に行きたいと思った理由は何ですか",
-    "bn": "কেন আপনি জাপানে যাওয়ার সিদ্ধান্ত নিয়েছিলেন?"
+    "bn": "আমি কেন জাপানে যেতে চেয়েছিলাম?"
   },
   {
-    "startSec": 42.354,
-    "endSec": 58.126,
-    "en": "In my case, there are two main reasons. One is that I am an IT engineer and I was interested in A related work. While living in Bangladesh, in a Japanese company,",
-    "jp": "私の場合、主な理由は2つあります。 一つは、ITエンジニアであり、関連業務に興味を持ちました。 バングラデシュに住む中、日本企業、",
-    "bn": "আমার কেস্ত্রে প্রধনত কারণ বলা জাই দুতো যেতো আমি এক জন IT ইঞ্জিনিয়ের এবং এই রিলেটেট আসুলে কাজকরের বাপারে আগ্র হয়ছিল"
+    "startSec": 46.128,
+    "endSec": 62.192,
+    "en": "For me, the main reason is two, because I am an IT engineer and I actually became interested in working at a related company and while I was in Bangladesh, I worked for a Japanese company.",
+    "jp": "2つの理由があります 私はITエンジニアで 関連会社で働くことに夢中でした",
+    "bn": "আমার ক্ষেত্রে প্রধানত কারণ বলা যায় দুটো, যেহেতু আমি একজন আইটি ইঞ্জিনিয়ার এবং এ রিলেটেড আসলে কাজ করার ব্যাপারে আর্ভূঁ হয়েছিলাম এবং বাংলাদেশে থাকাকালীন জাপানিস কোম্পানিতে,"
   },
   {
-    "startSec": 58.126,
-    "endSec": 73.333,
-    "en": "I have been working in this field for almost 45 years. So, I was very proud of it. And there is a great opportunity in Japan for IT engineers. If you want to challenge yourself, if you want to improve yourself, there is a great opportunity.",
-    "jp": "ここまで45年で働いています。 とても誇りに思います。 そして、ITエンジニアにとって日本には素晴らしい機会があります。 自分でチャレンジしたい場合は、自分で改善したいなら、素晴らしい機会があります。",
-    "bn": "45 কোছেরের কাছা কাছি কাছ করিছি তো এখেত্রে আমার আগ্রো ছিলো এবং জাপানে আইটি ইঞ্জিনিয়ার হিসেবে বেশ ভালো অপর্টিনিটি আ�"
+    "startSec": 62.192,
+    "endSec": 77.792,
+    "en": "I've been working for almost five years, and I've been interested in this and I have a very good job in Japan as an IT engineer, I want to challenge myself enough, I want to improve myself enough, I have a very good job in education.",
+    "jp": "5年近く 仕事をしていて,興味がありました. そして,日本ではITエンジニアとして, 挑戦し,改善し, 勉強する機会がとても高いのです.",
+    "bn": "প্রায় পনে পাঁচ বছরের কাছাকাছি কাজ করিছি, তো এক্ষেত্রে আগ্রহ ছিল এবং জাপানে আইটি ইঞ্জিনিয়ার হিসেবে বেশ ভালো অপর্যুলিটি আছে নিজেকে যথে চ্যালেঞ্জ করতে চাই, নিজেকে তেই ইমপ্রুভ করতে চাই, সেক্ষেতে বেশ ভালো অপর্যুলিটি আছে।"
   },
   {
-    "startSec": 73.333,
-    "endSec": 85.877,
-    "en": "This is one reason and the second reason is Japan's lifestyle. Everything here is very clean and organized. Cleanliness is also very important. That's why I came to Japan.",
-    "jp": "日本でのライフスタイルを第一に考える理由です。 ここにすべてが非常にきれいで整理されています。 清潔感も非常に重要です。 そういうわけで日本に来たんです。",
-    "bn": "তো এটা একটা কারণ এবং দিতি ওটি হচ্ছে জাপনের লাইফ স্টাইল তো এখানে সব কিছু নিয়ন তারণ মাফিক হয় এবং পরিষ্কার পরেছুনো সব ক�"
+    "startSec": 77.792,
+    "endSec": 90.768,
+    "en": "This is one reason and the second is the Japanese lifestyle, where everything is strictly regulated and everything is taken together in a clean dress, basically to bring the Japanese into the world.",
+    "jp": "その理由は\"つ目 第二の理由は 日本の生活スタイルです 規則を遵守し 清潔な衣装の選択をしても すべてが日本人に 近づくことに繋がっています",
+    "bn": "এটা একটা কারণ এবং দ্বিতিয়টি হচ্ছে জাপানের লাইভস্টাইল, এখানে সবকিছু নিয়ম ক্ষারণমাফিক হয় এবং পরিষ্কার পরেচ্ছন্নেও সবকিছু মিলিয়ে মূলত জাপানী আসার ব্যাপারে সিদ্ধন্তে নেয়া।"
   },
   {
-    "startSec": 86.361,
-    "endSec": 91.475,
-    "en": "How do you feel before and after coming to Japan?",
+    "startSec": 92.144,
+    "endSec": 97.904,
+    "en": "What are your impressions of coming to Japan?",
     "jp": "日本に来る前の印象と来てからの印象はいかがですか",
-    "bn": "জাপানে আসার আগে এবং পরে আপনার কেমন লাগছে?"
+    "bn": "আপনি কি জাপানে আসার আগে এবং পরে দেখেছেন?"
   },
   {
-    "startSec": 92.173,
-    "endSec": 105.823,
-    "en": "As I said earlier, I have been working for a Japanese company in Bangladesh for about 5 years.",
-    "jp": "先ほど述べたように、バングラデシュで約5年間日本企業で働いています。",
-    "bn": "্যামন্তা একটো আগে বলেছিলাম বাংলাদেশে থাকা কেলিন আমি আসলে জাপনিস একটি কমপানির বাংলাদেশি ব্রাংচে প্রাই পাঁছ বছরে কা�"
+    "startSec": 99.152,
+    "endSec": 113.744,
+    "en": "As I said before, while I was in Bangladesh, I actually worked for a Japanese company in Bangladesh for about five years, so while I was here, I was definitely in Japan.",
+    "jp": "ブラジルで5年近く 班族企業で働いていたので,",
+    "bn": "যেমনটা একটো আগে বলেছিলাম, বাংলাদেশে থাকাকালীন আমি আসলে জাপানিস একটি কোম্পানির বাংলাদেশী ব্রাঞ্চে প্রায় পাঁচ বছরের কাছাকাছি সময়ে কাজ করছি, তো এখানে থাকাকালীন অবস্থায় অবশ্যই জাপানের"
   },
   {
-    "startSec": 105.823,
-    "endSec": 118.211,
-    "en": "about business culture and Japanese culture. But as much as I was aware of it, the way life was going on in Asia,",
-    "jp": "事業文化・日本文化について しかし、そのことを意識していた限り、アジアで生活する方法は、",
-    "bn": "business culture এবং জাপানের কাল্চার সম্প্রকে কিছলা ধারণা ছিলো কিন্তু জত্তাই ধারণা থাবুক নেকনে আসলে এসে জিবদিলাত্রা যামন্টা হয় আ"
+    "startSec": 113.744,
+    "endSec": 126.864,
+    "en": "I had some idea of the business culture and the culture of Japan, but as far as I can tell, it's a way of life as it is.",
+    "jp": "ビジネス文化や日本の文化について ほんの少しの理解がありましたが 概念が深ければ ライフスタイルは",
+    "bn": "বিজিনেস কালচার এবং জাপানের যে কালচার সম্পর্কে কিছুটা ধারণা ছিল, কিন্তু যতটাই ধারণা থাক নিখান আসলে এ সে জীবনযাত্রা যেমনটা হয় আসলে,"
   },
   {
-    "startSec": 118.211,
-    "endSec": 125.239,
-    "en": "I don't know if I should be worried about the fact that Shatika was pregnant, but what do you think about this mystery?",
-    "jp": "シャチカが妊娠していたという事実を心配すべきかどうかはわかりませんが、この謎についてどう思いますか?",
-    "bn": "সত্তিকার যে উপলোগ থি সেটা আস্সলে চিন্তা হবনাথে এক টানোর রোগনি হয়ন তো এইদিমিস্টের কি মনে রখাও ছিছো"
+    "startSec": 126.928,
+    "endSec": 134.192,
+    "en": "The power of the force is a different force than the thought of it.",
+    "jp": "精神の力とは 思考の力とは違うので 記憶の力とは何か?",
+    "bn": "সক্তিকার যুক্লক্তি সেটা আসলে চিন্তা হবনা থেকে একটা অন্যরকণী হয় তো এই মিশ্রায়ের কী মনে রাখার চিত্র?"
   },
   {
-    "startSec": 127.036,
-    "endSec": 130.471,
-    "en": "What did you think was good about living in Japan?",
+    "startSec": 137.744,
+    "endSec": 141.712,
+    "en": "What was the point of coming to Japan?",
     "jp": "日本に来てよかったと思った点は何ですか?",
-    "bn": "জাপানে বাস করা নিয়ে তুমি কি ভাব?"
+    "bn": "জাপানে এসে কি ভালো লাগলো?"
   },
   {
-    "startSec": 130.471,
-    "endSec": 146.467,
-    "en": "First of all, what I want to say is that everything here is legal. So, in our country, the fact that in this case, it may be a little selfish, but in Japan, everything is legal. Even if the rules are a little difficult, everything is legal.",
-    "jp": "まず第一に、私が望むことは、ここにあるすべてが法的であるということです。 ですから、我が国では、このケースでは少し自滅するかもしれませんが、日本では、すべてが法的です。 ルールが少し難しい場合でも、全てが法的です。",
-    "bn": "প্রথমন্তো যেটা বলতে চাই সবকিছ এখনে নিয়ম মাফিক হয় আমাথের দেশে যেজিনিস্টা দেখা যায় যে এখিত্রে হয়তে একটো নিস্বি"
+    "startSec": 142.224,
+    "endSec": 159.92,
+    "en": "First of all, I want to say that everything is by the rules, and the loyalty that we have in this country is that it may be a little bit of a loyalty, but in Japan everything is by the rules, and the rules are a little bit hard, but the rules are not everything.",
+    "jp": "まず,私は言いたいのは,この国では, ルールがすべてあるということです. ルールが少し厳しいかもしれませんが,日本では,ルールがすべてではありません.",
+    "bn": "প্রথমোত যেটা বলতে চাই, সবকিছু এখানে নিয়ম মাফিক হয়, তো আমাদের দেশে যেজি নিষ্ঠা দেখা যায় যে এই ক্ষেত্রে হয়তো একটু নিষ্ঠিত হতে পারে, কিন্তু জাপানের সবকিছু নিয়ম মাফিক, যে হয়তো নিয়ম কাননগুলো একটু কঠিন হলেও সবগিলো নিয়ম সবকিছু নি"
   },
   {
-    "startSec": 146.467,
-    "endSec": 150.724,
-    "en": "I think this is very positive for me.",
-    "jp": "私はこれが私にとって非常に肯定的だと思う。",
-    "bn": "মেনে এবং সকিক সমাই পালন করা হয়ে এই জনিষ্টা আমার কাছে বিস্ট পাজিটিক মনে হয়েছে"
+    "startSec": 159.92,
+    "endSec": 164.848,
+    "en": "By being observed and observed in the right time, this day has been very positive to me.",
+    "jp": "適切なタイミングで守られれば この日曜日がとてもポジティブに思えました",
+    "bn": "মেনে এবং সঠিক সময়ে পালন করা হয়ে, এই দিনিসটি আমার কাছে বেশ পজিটিভ মনে হয়েছে।"
   },
   {
-    "startSec": 150.848,
-    "endSec": 163.602,
-    "en": "What is the problem in Japan? As an IT engineer, I came to Japan. In the beginning, I would say that even though I used to work in a Japanese company",
+    "startSec": 165.776,
+    "endSec": 179.536,
+    "en": "So what's wrong with Japan?",
     "jp": "では逆に日本で困ったことは何ですか?",
-    "bn": "জাপানে সমস্যা কি? একজন আইটি ইঞ্জিনিয়ার হিসেবে, আমি জাপানে এসেছিলাম । শুরুতে আমি বলব যে যদিও আমি কোন জাপানি কোম্পানীর সাথে কাজ করতাম"
+    "bn": "কিন্তু জাপানে সমস্যাটা কী?"
   },
   {
-    "startSec": 163.602,
-    "endSec": 178.079,
-    "en": "The working culture in Bangladesh and the working culture in Japan is a bit different. So, it may take some time to think about it and come to a conclusion.",
-    "jp": "バングラデシュの労働文化と日本での労働文化は少し異なります。 そこで、それについて考え、結論に来るのに時間がかかることがあります。",
-    "bn": "্বান্লেতেশে আসলে কাছকরার কাল্চার এবং জাপানে সলস্রি কাছকরার কাছকরার কাছকরার কাছকরার এটা আমি মনে কিছুতা আলাদা এজন্ন প"
+    "startSec": 179.536,
+    "endSec": 195.888,
+    "en": "The culture of working in Bangladesh and the culture of working in Japan is a little different, so I think it might take a little time to get started.",
+    "jp": "職種は少し違いますので,まずは少し時間をかけて 投稿を少しずつ 期待してやると思えます.",
+    "bn": "বাংলাদেশে আসলে কাজ করার যে কালচার এবং জাপানে সদস্যরই কাজ করার যে কালচার এটা আমি মনে করি কিছুটা আলাদা এজন্য প্রথমে অবস্থতে একটু সময় লাখিতে পারে এই জিনিসটা একটু চিন্থাবনা করে পোস্ততি নিয়ে আশা উজিত করে মনে করে।"
   },
   {
-    "startSec": 178.261,
-    "endSec": 192.454,
-    "en": "What do you want to do in Japan in the future? I have been living in Japan for almost 2 years now. I have a family.",
-    "jp": "これから日本にしたいのは? 日本で2年近く暮らしています。 私は家族を持っています。",
-    "bn": "Kongo নিহন দে দো স্তে ইকিতাই তো মত্তেমাস কা? এখন যে তু জাপনে প্রায় দুই পছ্ছোর আরেই বছ্ছরের কাছে কাছে আমি আছি তো বর্তম�"
+    "startSec": 197.232,
+    "endSec": 212.768,
+    "en": "I'm in Japan for about two years, almost two years, so I'm with my family now, so I'm going to be in Japan for about two years.",
+    "jp": "韓国では,この2年近く日本に滞在しているのに,私は家族と一緒にいます.",
+    "bn": "কঙ্গো, নিহনে দেওষ্টে ইত্যারি তো মন্তেমাসকা? এখন যে তো জাপানে প্রায় দু বছর, আরাই বছরের কাছে কাছিা আছি, তো বর্তমানে ফ্যামিলির সহই আছি, তো"
   },
   {
-    "startSec": 192.454,
-    "endSec": 196.696,
-    "en": "the Japanese law and also how",
-    "jp": "日本法と日本の法",
-    "bn": "্যাপনে নিয়ম কানন মিনে এবং সেই সাথে কি হাবে"
+    "startSec": 212.768,
+    "endSec": 219.152,
+    "en": "The Japanese canon, and how",
+    "jp": "法律に準拠し,",
+    "bn": "জাপানের নিয়ম কানন মেনে, এবং সেই সাথে কীভাবে"
   },
   {
-    "startSec": 197.311,
-    "endSec": 209.886,
-    "en": "I would like to be a part of this society. I want to be a part of this society. I want to be a part of this society.",
-    "jp": "この社会の一員になりたいと思っています。 この社会の一員になりたい。 この社会の一員になりたい。",
-    "bn": "এই সসাইটিতে একিন বা এই সমাজে কি ভাবে আরো এক জন সদাশ্যি স্যাবে অবধান রাছিতে পারি সেরকোম ভাবে চলতে চাই সেই সাথে অবশোই"
+    "startSec": 221.328,
+    "endSec": 236.416,
+    "en": "I want to continue to do this as a way to contribute to this society, as a member of this society, and as an archiving engineer, of course, to my own interests.",
+    "jp": "コミュニティやコミュニティの他のメンバーとして 貢献したいのです 建築技術者としての自分の能力も",
+    "bn": "এই সোসাইটিতে কিংবা এই সমাজে কিভাবে আরও একজন সদস্য হিসেবে অবদান ডাকতে পারেন, সেককুমভাবে চলতে চাই, সেই সাথে অবশ্যই নিজের যে আর্কি ইঞ্জিনিয়ার হিসেবে আছে, সেই ক্ষেত্রে নিজের"
   },
   {
-    "startSec": 209.886,
-    "endSec": 215.05,
-    "en": "to improve the quality of the work.",
-    "jp": "仕事の質を改善するために。",
-    "bn": "্যে যোক্কোতা কিমে কাজিনে কিই হবে আরো ইপ্রুফ্ক করা যে সেটা চানেজ করতে যে"
+    "startSec": 236.416,
+    "endSec": 241.872,
+    "en": "The skills and the work that can be improved can also be changed.",
+    "jp": "能力や職務の改善方法も 変えられるでしょう",
+    "bn": "যে যোগ্যতা কিংবা কাজী নেয়া কীভাবে আরও ইমপ্রুভ করা যে সেটাও চ্যানেজ করতে যাবে।"
   },
   {
-    "startSec": 217.635,
-    "endSec": 234.177,
-    "en": "What do you think about living in Japan for Bangladeshis? First of all, I think most of the Bangladeshis in Japan are Muslims. The first thing they can face is not eating.",
-    "jp": "バングラデシュの日本に住むことについてどう思いますか? まず第一に、日本ではバングラデシュのほとんどがイスラム教徒だと思う。 直面できるのは食べることではありません。",
-    "bn": "্বাংগুলা দেশুজিন নিতোত্তে নিহন দেনো সেকাত্সা দো ময়মস্কা? প্রথমে যদি একেত্রে বলতে হয় যাপনে আশার কর আমি মনে করি �"
+    "startSec": 245.808,
+    "endSec": 262.928,
+    "en": "First of all, when I come to Japan, I think that most of Bangladesh's Muslims, the first problem they face is food.",
+    "jp": "まず日本に来たとき 孟加ラではイスラム教徒が多く 直面する問題は食べ物です",
+    "bn": "প্রথমে যদি এক্ষেত্রে বলতে হয়, জাপানে আসার পর, আমি মনে করেই যেতে বাংলাদেশের বেশির ভাগ মুসলিম, এই ক্ষেত্রে প্রথমে যে সমস্যাটা তারা ফেস করতে পারে, সেটা হচ্ছে, খাবার নিয়ে।"
   },
   {
-    "startSec": 234.177,
-    "endSec": 242.209,
-    "en": "In Japan, there is a lot of delicious food but in our case, we can't eat anything other than halal food.",
-    "jp": "日本では、美味しい食べ物がたくさんありますが、私たちの場合、ハラールフード以外のものは食べません。",
-    "bn": "তো জাপানে অনেক দেখাছে দেশুস্যা একিমো মজাদার খাবার আছে কিন্তু আমাদের কেট্য দেখাছে যে হালাল খাবার ছালা যে হিতে পার�"
+    "startSec": 262.928,
+    "endSec": 270.96,
+    "en": "In Japan, many people say that there is a lot of good food in the country, but in our case, it is not possible to eat anything other than halal food.",
+    "jp": "日本では多くの方が 料理が美味しいと 示すが,私たちの場合は, 料理は halal以外には食べられないと 示すのです.",
+    "bn": "জাপানে অনেক দেখাচ্ছে দেশে উষয়কেই মজাদার খাবার আছে, কিন্তু আমাদের ক্ষেত্রে দেখাচ্ছে যে হালাল খাবার ছাড়া যে তোমরে খেতে পারি না।"
   },
   {
-    "startSec": 242.209,
-    "endSec": 256.323,
-    "en": "So, in this case, the first step may be a little challenging. But there are many halal shops in the present and many supermarkets are showing halal food. In that case, we can solve the problem by using various apps or talking to the next person.",
-    "jp": "ですから、この場合、最初のステップは少し難しいかもしれません。 しかし、現時点では多くのハラールショップがあり、多くのスーパーマーケットがハラールフードを見せています。 その場合、様々なアプリや、次の人に話して問題を解決することができます。",
-    "bn": "তো এই কেত্রে প্রথন প্রথন হাপার একটি চেলেন্জিংগ মনে হোতে পারে কিন্তু বর্তমানে অনেক হালাল দুকান আছে এবং অনেক সুপার"
+    "startSec": 270.96,
+    "endSec": 285.488,
+    "en": "It may seem a challenge at first, but there are many halal shops and many supermarkets that offer halal food in different apps.",
+    "jp": "この分野での最初の考えは難しいかもしれませんが 現在では多くのハラールショップがあり スーパーマーケットも ハラール食品を入手できるようにしています",
+    "bn": "এই ক্ষেত্রে প্রথম প্রথম ভাবারটি একটি চ্যালেঞ্জিং মনে হতে পারে, কিন্তু বর্তমানে অনেক হালাল দোকান আছে এবং অনেক সুপারমার্কেটেও দেখায়ছে হালাল খাবার পাওয়া যা সেই ক্ষেত্রে বিভিন্ন অ্যাপ ব্যবহার করে কিন্তে বা পরিচিত নিশান্তে ক"
   },
   {
-    "startSec": 256.909,
-    "endSec": 263.441,
-    "en": "Do you have any advice for those who are studying Japanese in Bangladesh?",
+    "startSec": 287.472,
+    "endSec": 294.608,
+    "en": "Is there any advice for those who are learning Japanese in Bangladesh now?",
     "jp": "今バングラデシュで日本語を勉強している方々に何かアドバイスはありますか",
-    "bn": "যারা জাপানে পড়াশোনা করছেন তাদের জন্য আপনার কি কোন উপদেশ আছে?"
+    "bn": "বাংলাদেশে জাপানি ভাষা শিখতে যাচ্ছেন তাদের জন্য কি কোন পরামর্শ আছে?"
   },
   {
-    "startSec": 263.441,
-    "endSec": 279.422,
-    "en": "In Bangladesh, my personal opinion is that JLPT N4 or JLPT N3 may not be a problem in Japan, but it is a mistake. Here, the main focus is communication.",
-    "jp": "バングラデシュでは、私の個人的な意見は、JLPT N4 または JLPT N3 が日本では問題ではないかもしれないということですが、それは間違いです。 ここは、メインフォーカスがコミュニケーションです。",
-    "bn": "তো ভাংলাদেশে থাকালিন আমার বেক্তিগতো যে অফিক্ষত আসলে অনেকেম অনেকারা যে JLPT N4 অথবা JLPT N3 থাকলে আসলে হয়েতো জাপনে গিয়ে ত"
+    "startSec": 294.768,
+    "endSec": 311.696,
+    "en": "While I was in Bangladesh, my personality is actually the practice that many people think that if JLPT N Four or JLPT N Three were to be in Japan, it would be less of a problem, which is actually wrong, because the main focus here is on the comin set.",
+    "jp": "仏教で私が身につけた経験は 多くの人が考えました 仏教で日本に行くのは 難しいことではありませんが 仏教で日本に行くのは 難しいことなのです",
+    "bn": "ভাংলাদেশে থাকালীন আমার ব্যক্তিকতা যে অভিক্ষতা আসলে অনেকেই মনে করে যে জেএলপিটি এন ফোর অথবা জেএলপিটি এন থ্রি থাকলে আসলে হয়েতে জাপানে গিয়ে তেমন সমস্যা হবে না, ব্যাপারটা আসলে ভুল, এখানে যে বিশেষ্ট গুরুত্ব কোনা সেটে হচ্ছে কমিন"
   },
   {
-    "startSec": 279.422,
-    "endSec": 292.654,
-    "en": "JLPT certificate and the ability to communicate are two different things. For this, I would like to give a suggestion to everyone. First of all, listen to Japanese and practice it.",
-    "jp": "JLPTの証明書と通信能力は2つの異なることです。 そのためには、みんなに提案してほしい。 まず、日本語を聞いて練習しましょう。",
-    "bn": "JLPT র সার্টিফিকের থাকা এবং কোমিনিকেশনের এবলিটি তোরি করে দোটালা দেবে পার। এছন্ন আমি বিক্তিক হয়েবে সাইশন দিকো হচ্ছে"
+    "startSec": 311.696,
+    "endSec": 324.928,
+    "en": "It's also a matter of getting a jail-PTI certificate and building communication skills, so I personally am passionate about, as much as possible, listening to Japanese, which means different people.",
+    "jp": "コミュニケーション能力の向上も 重要だということです だから私は個人的に できるだけ日本語を 聴いて 実践することに 取り組んでいます",
+    "bn": "জেইল-পিটির সার্টিফিকেট থাকা এবং কমিউনিকেশনের অ্যাবিলিটি তৈরি করাতেও টালাদে ব্যাপার, এজন্য আমি ব্যক্তিকভাবে সাজিসন দ্বিপুর হচ্ছে, যথা সম্ভব, জাপানিজ শুনে শুনে প্যাক্টিস করা, অর্থা বিভিন্ন মানুষের"
   },
   {
-    "startSec": 292.654,
-    "endSec": 299.358,
-    "en": "Practice it a lot so that when you come to Japan, you don't have any communication issues.",
-    "jp": "日本に来ると、コミュニケーションの問題がなくても、たくさん練習しましょう。",
-    "bn": "কাথা সুনে সেটা বেশে বেশে প্রাক্টিস করে যানো জাপানে আসার পর কোমিনিকেশন একে তেটামন কোন সমসা না হয়।"
+    "startSec": 324.928,
+    "endSec": 331.632,
+    "en": "It's a pretty good practice to get around, since communication is not a problem when you come to Japan.",
+    "jp": "コミュニケーションの問題は 日本に来た後には ありません",
+    "bn": "কথা শুনে সেটা বেশে বেশে প্র্যাকটিস করে যানো জাপানে আসার পর কমিনিকেশনীতে তেমন কোন সমস্যা না।"
   },
   {
-    "startSec": 299.593,
-    "endSec": 306.373,
-    "en": "Is there anything you would like to say to the Bangladeshi people who want to go to Japan?",
+    "startSec": 333.072,
+    "endSec": 340.56,
+    "en": "Do you have anything to say to anyone in Bangladesh who wants to go to Japan?",
     "jp": "日本へ行きたいと考えているバングラデシュの方々に何か言いたいことはありますか",
-    "bn": "বাংলাদেশের যে সমস্ত নাগরিক জাপানে যেতে চায়, তাদের কাছে কি আপনি কিছু বলতে চান?"
+    "bn": "বাংলাদেশের যারা জাপানে যেতে চান তাদের কি কিছু বলতে চান?"
   },
   {
-    "startSec": 306.606,
-    "endSec": 311.45,
-    "en": "In this case, I will definitely say those who are coming from abroad.",
-    "jp": "この場合、海外から来ている人たちは間違いなく言うでしょう。",
-    "bn": "A এক কেত্রে আমি বল্বো অবশোই যেতু বিদেশা আস্ছেন"
+    "startSec": 341.104,
+    "endSec": 346.624,
+    "en": "In this case, I would say of course that you are coming overseas, and",
+    "jp": "海外に来たと 言うべきでしょう",
+    "bn": "এক্ষেত্রে আমি বলবং অবশ্যই যে তু বিদেশে আসছেন, এবং"
   },
   {
-    "startSec": 311.45,
-    "endSec": 333.642,
-    "en": "is very different from the laws of Bangladesh. In this case, I would suggest everyone to follow the laws of Japan, if you are familiar with them or if you have come here through any agency, then follow these laws and maintain this mentality. Because you just have to...",
-    "jp": "バングラデシュの法律とは違います。 この場合は、皆さんが日本法に従うよう勧めます。もしあなたがそれらに精通しているか、もしあなたがどんな機関から来ているのか、そしてこれらの法則に従い、この精神性を維持すればいいでしょう。 ・・・",
-    "bn": "a দেশের নিয়াম কানন বাংগালাদেশের নিয়াম কানন থেকে অনেকটাই আলাতা এখেরতে আমার অনুরোত থাকবে সবাই অবশ্বই যাপানের নিয়া�"
+    "startSec": 346.624,
+    "endSec": 368.816,
+    "en": "The rules of this country are very different from the rules of Bangladesh. In this case, I would ask everyone to follow the rules of Japan, whether it is known to you or from any of the species you come from.",
+    "jp": "この国の法律は,バングラデシュの法律とは全く違います.この場合,私は皆さんにお願いします,日本法です.",
+    "bn": "এই দেশের নিয়মকানুন, বাংলাদেশের নিয়মকানুন থেকে অনেকটাই আলাদা।এক্ষেত্রে, আমার অনুরোধ থাকবে, সবাই অবশ্যই জাপানের নিয়মকানুন, সেটি কি আছে পরিচিত যংহ কিংবা আপনার যথেকে কোনো জিনসির মাধ্যমে আসেন তাদের কাছ থেকে যে নেই, সে এই নিয়মকা�"
   },
   {
-    "startSec": 333.642,
-    "endSec": 334.405,
-    "en": "",
-    "jp": "",
-    "bn": "ানা"
+    "startSec": 368.816,
+    "endSec": 370,
+    "en": "- What?",
+    "jp": "ほら!",
+    "bn": "আঁ!"
   },
   {
-    "startSec": 334.405,
-    "endSec": 344.57,
-    "en": "You are not representing Bangladesh here. This is necessary so that we can manage it well. Don't worry about this and try to follow it.",
-    "jp": "バングラデシュの代表的ではありません。 よく管理できるように必要です。 心配しないでください。",
-    "bn": "নিয়া আসছেন না আপনি বাংগাদেশকেও আসল এখনে রিপ্রেজেন্ট করতেছেন এছন্ন এই জনিষ্ট আবশ্যিনিয়ম কানো যানো ভালবে মেনে চ�"
+    "startSec": 370.288,
+    "endSec": 381.904,
+    "en": "You are representing the Left, so this gentleman would have to think about it and try to make it work.",
+    "jp": "代わりに 代表として 国を代表するので 規制を順守させ 実行しようとしました",
+    "bn": "নিয়ে আসছেন না, আপনি বাঙাদেশকেও আসলে এখানে ঋপ্রেজেন্ট করতেছেন, এজন্য এই জনিস্ত অবশ্যিনিয়মকারণ যেন ভালোয়ার মেনেজ উলতে পারেন, এ ব্যাপারটা চিন্তা আমনা করি এবং সেটা ফলা করার চেষ্টা করতেন।"
   },
   {
-    "startSec": 347.802,
-    "endSec": 364.318,
-    "en": "My name is Banglai Prashna. Most of the people who came for this interview don't know about our company. They don't know anything about us. So, what are we going to start with?",
-    "jp": "私の名前はBanglai Prashnaです。 このインタビューに来たほとんどの人は、当社について知りません。 私たちについて何も知りません。 それでは、どうなるの?",
-    "bn": "আমারতের বাংলায় প্রশ্নারকে যারো কাপনে মতামটি আরকি আমাদের কম্পনিয়ারকি যারা আস্কের ইন্ট্রবিয়ের পার্পাজেবং কম্প�"
+    "startSec": 385.136,
+    "endSec": 402.56,
+    "en": "And I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and I'm asking you in Bengali, and this is the company that is the company that is the company that is the company that",
+    "jp": "インタビューの先駆者であり 会社の背景がよくあるのですが サムセンが少しも私の先駆者だと 知っているでしょうか?",
+    "bn": "আমার থেকে বাংলায় প্রশ্ন আরকি, ধেরও কামনে মোটামুটি আরকি আমাদের এ কোম্পানি আরকি, যারা আজকের ইন্টারভিউর পারপাস এবং এ কোম্পানি ব্যাকগ্রাউন্ড একটি হলেও, জানে নাকি, সমসেন আমার থেকে কিছুটা হলেও, তো সেই হিসেবে যামার যে পারপাস তিন্য শুরু"
   },
   {
-    "startSec": 364.318,
-    "endSec": 371.918,
-    "en": "The company's purpose is to open up Bangladesh Hector Languages which is the tagline of Onystop Solution.",
-    "jp": "同社の目的は、Onystop Solutionのタグラインであるバングラデシュのヘクター言語を開くことです。",
-    "bn": "o নারা কমপানিটা যে পর্পাজনে বাংগলাদেশ এক্টা লেম্যেজে স্কুল শুডু করতে ছে যেটা টেগলাইন হচ্ছু অনিস্টপ সলুশন"
+    "startSec": 402.56,
+    "endSec": 410.16,
+    "en": "His company is starting a LAMGE school in Bangladesh, which is a tagline for On-Stop Solutions.",
+    "jp": "会社でバングラデシュで\"オンストップソリューション\"というタグを掲げて ラムゼの学校を設立しています",
+    "bn": "ওনার কোম্পানিটা যের পর্পাসনে বাংলাদেশ একটা ল্যামেজে স্কুল শুরু করতেছে যেটা ট্যাগলাইন হচ্ছু অন স্টপ সোলুশন।"
   },
   {
-    "startSec": 371.918,
-    "endSec": 389.914,
-    "en": "So, what do you think about this? Do you think that this is the way to do it? Or if you have any suggestions for us, do you think it is our strength... ...or do you think that our students here have a low level of expectation?",
-    "jp": "それでは、どう思いますか? これを行う方法は? あるいは、私たちの提案があれば、それが私たちの強みであると思います...それとも、私たちの学生が期待の低レベルを持っていると思いますか?",
-    "bn": "So, সে কেত্রা আপনা মতমত কি আনি কেমার মনাহয়ার কি অন্যান্যার দেছে কি আমাদের অতোবা আমাদের চন্ডাবে যদি কোনো সাজেশন থাক�"
+    "startSec": 410.16,
+    "endSec": 428.624,
+    "en": "So what do you think about others, what do you think about others, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what do you think about us, or what we think about us, or what we think about us, or what we think about us, or what",
+    "jp": "ほかの組織や組織に似たようなもの, 組織をこんな風に整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの, 組織を整えるべきもの,組織を",
+    "bn": "সেক্ষেত্রে আপনো মতামত কি তোনি কেমন মনে হয় আরকে, অন্যান্য দেচে একই আমাদের, অথবা আমাদের জন্য যদি কোন সাজেশন থাকে যে এই ভাবে করা উচিত, অথবা অন্যান্য যারা আছে তাদের তুলনের সেল আমাদের স্ট্রেংত বা আপনে কেমন মনে হয়ই যে আমাদের এখানে"
   },
   {
-    "startSec": 390.586,
-    "endSec": 406.358,
-    "en": "As far as I know, I have heard a lot about other agencies. I don't have any personal experience, but I have heard a lot from the students. I believe that the students are the target of most of the agencies.",
-    "jp": "知っている限り、他の機関についてよく聞いています。 個人的な経験はありませんが、学生から多く聞いています。 ほとんどの機関のターゲットである学生は信じています。",
-    "bn": "A কেত্রে আমি যততকো ভুষ্তে করেছি অন্যান্য এজিদি সম্পরকে যততকো সনেছি আমার বেক্তি গাতো যে তো ভিক্যতা নি কিন্তো যতত�"
+    "startSec": 429.296,
+    "endSec": 445.344,
+    "en": "So as far as I've been able to understand, as far as I've been able to understand about other agencies, as far as I've been able to personally understand, that there's no curiosity, but as far as I've been able to understand, that the curiosity that they have, basically, is that most agencies have a lot of curiosity.",
+    "jp": "ステューティングを受けた人の 興味を引いたのは私ではなく 基本的に彼らの好奇心を 抱いているのは ほとんどの機関です",
+    "bn": "এক্ষেত্রে আম যতটুকু বুঝতে করেছি, অন্যান্য এজেন্সি সম্পর্কে যতটুকুশ নেছি, আমার ব্যক্তিগাত যে তা উদ্ভিক্ষতা নেই, কিন্তু যতটুকুশ নেছি, যার স্টুয়েন্ট হয়েছে তাদের কাছ থেকে, মূলত যে তাদের যে উদ্ভিক্ষতা আছে, তো বেশিরভাগ এজেন্স"
   },
   {
-    "startSec": 406.358,
-    "endSec": 421.172,
-    "en": "to earn money. So, what happened after that? Did they follow the rules properly? Even if they got the job properly, this is not possible. Most of the agencies, I am not talking about everyone, some agencies are exceptional, but most of the agencies do not worry about this.",
-    "jp": "お金を稼ぐために。 それでは、その後に何が起こったのか? ルールをきちんと守っていましたか? きちんと仕事をしたとしても、これは不可能です。 ほとんどの代理店、私は皆について話していません、一部の代理店は例外的ですが、ほとんどの代理店はこのことを心配しません。",
-    "bn": "পার করতে পেরে টাকাই নিকাউন করা তো এরপরে আসার পরে আসলে কি হোলো তারা নিয়মকারণ ঠিকমত্ত মানুলো কিনা ঠিকমত্ত চাক্তে পে�"
+    "startSec": 445.344,
+    "endSec": 460.544,
+    "en": "So what happens after they get there, is whether they're the right kind of people, the right kind of jobs, they take all these things, most agencies, not everyone, some agencies come in exceptional, but most.",
+    "jp": "収入を節約できるのです 収入が上がった後 何が起こるか 規則に合致したかどうか 適切な仕事に就けるかどうか 管理者の多くは 専門的な会社ですが",
+    "bn": "পার করতে পেরে টাকায় নিকাম করা, তো এরপরে আসার পরে আসলে কী হলো, তারা নিয়মকানের ঠিকমত্ত মানুলয় কিনা, ঠিকমত্ত চাকরি পেলেপেন এসব ব্যাপার নেয়, বেশিরভাগ এজেন্সি, সবার কথা বলছি না, কিছু-কিছু এজেন্সি আসে এক্সেপ্সয়নাল, কিন্তু বেশিরভাগ �"
   },
   {
-    "startSec": 421.172,
-    "endSec": 438.004,
-    "en": "So, what you are thinking now is that you will prepare in such a way that they can come and work in the working visa. So, with this target, in the same way, you will prepare and train. I am seeing this positively because your target is...",
-    "jp": "そこで、今は、就労ビザで働けるような方法で準備を進めるつもりです。 そのため、このターゲットを同じ方法で準備して訓練します。 目標は...",
-    "bn": "তো যেতো এখন আপনেরা যেতো চিন্তে আমনা করছেন যে এমন ফাবে প্রস্তুত করবেন যানো এসেই তারা ঵ার্কিংগ ভিসায়তে যানো কাশ ক�"
+    "startSec": 460.544,
+    "endSec": 478.416,
+    "en": "Since you're worried about getting ready to go to work so they can go to work, so you can get this target ready and trained, so I'm looking forward to it.",
+    "jp": "準備を整え 作業部署へ移動し 作業を始めるよう 考えているので 準備を整え 訓練を進めるように 目標を持ってきて下さい",
+    "bn": "যেহেতু আপনারা যেহেতু চিন্তায়না করছেন যে এমনভাবে প্রস্তুত করবেন যান এসেই তারা ওয়ার্কিং বিসাতে যান কাজ করতে পারে, তো এই টার্গেটটা নিয়ে সেভাবে যেহেতু প্রস্তুতই নিয়ে এবং ট্রেনিং করিয়া আনবেন, এইটা আমি পদরিপ্রি দেখছিত কারণ আপ�"
   },
   {
-    "startSec": 455.932,
-    "endSec": 459.449,
-    "en": "I am going to take a nap.",
-    "jp": "私はナップを取るつもりです.",
-    "bn": "্যানে নম্তে তুলেখে তোমাই তাকাস শোলিতে হনিকে বাইতে"
+    "startSec": 497.488,
+    "endSec": 501.005,
+    "en": "The name of the copper is written on a stick. Who is the arrow?",
+    "jp": "銅の名前が刻まれたのは 粘着の石に刻まれています",
+    "bn": "তামের নামটা একটে লেখা তো আঠাক শৈলিত হনে কে বে তীর?"
   }
 ];

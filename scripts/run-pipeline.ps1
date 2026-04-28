@@ -34,6 +34,7 @@ param(
     [switch]$SkipJapanPromo,
     [switch]$SkipViral,
     [switch]$ViralOnly,             # only re-run 5b
+    [switch]$RenderOnly,            # skip steps 1-4 (use existing artifacts), run only 5a + 5b
     [switch]$NoRender               # build assets but don't run remotion render
 )
 
@@ -88,6 +89,21 @@ if (-not $FfmpegCmd) {
     throw "ffmpeg not found on PATH. Install it (winget install Gyan.FFmpeg) and reopen the terminal."
 }
 $FfmpegExe = $FfmpegCmd.Source
+
+# Resolve npm and npx to their .cmd shims explicitly. Modern Node installs
+# ship npm.ps1 / npx.ps1 wrappers that have a known PS 5.1 arg-mangling bug
+# (https://github.com/npm/cli/issues/4980 — first char of first arg can be
+# eaten, producing errors like "Unknown command: 'pm'"). The .cmd shims
+# don't go through that wrapper.
+function Resolve-NodeShim($name) {
+    $cmd = Get-Command "$name.cmd" -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    $cmd = Get-Command $name -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    throw "$name not found on PATH."
+}
+$NpmExe = Resolve-NodeShim "npm"
+$NpxExe = Resolve-NodeShim "npx"
 
 # ---------------------------------------------------------------------------
 # Auto-discover source video in public/ if -Src wasn't passed
@@ -148,6 +164,18 @@ if ($ViralOnly) {
     $SkipTranscribe    = $true
     $SkipTranslate     = $true
     $SkipJapanPromo    = $true
+}
+
+if ($RenderOnly) {
+    # Reuse existing artifacts on disk; skip the slow upstream pipeline
+    # (silence detect, polish, enhance, transcribe, translate). Step 5a +
+    # 5b still run. Useful when you tweaked component code or captions and
+    # just want to re-render the videos.
+    $SkipSilenceDetect = $true
+    $SkipPolish        = $true
+    $SkipEnhance       = $true
+    $SkipTranscribe    = $true
+    $SkipTranslate     = $true
 }
 
 # ---------------------------------------------------------------------------
@@ -260,10 +288,10 @@ if (-not $SkipTranslate) {
 # ---------------------------------------------------------------------------
 if (-not $SkipJapanPromo) {
     Step "Step 5a -- JapanPromo build + render"
-    & node scripts/build-captions.mjs
-    & npm run lint
+    Invoke-Native -Exe "node" -Args @("scripts/build-captions.mjs")
+    Invoke-Native -Exe $NpmExe -Args @("run", "lint")
     if (-not $NoRender) {
-        & npx remotion render JapanPromo
+        Invoke-Native -Exe $NpxExe -Args @("remotion", "render", "JapanPromo")
     } else { Write-Host "  -NoRender set, skipping remotion render" -ForegroundColor DarkYellow }
 } else { Skip "Step 5a -- JapanPromo" }
 
@@ -273,10 +301,10 @@ if (-not $SkipJapanPromo) {
 # ---------------------------------------------------------------------------
 if (-not $SkipViral) {
     Step "Step 5b -- ImasFrontierViralCut build + render"
-    Write-Host "  (requires `ollama serve` running with gemma4:e4b)" -ForegroundColor DarkGray
-    & npm run build:viral
+    Write-Host "  (requires 'ollama serve' running with gemma4:e4b)" -ForegroundColor DarkGray
+    Invoke-Native -Exe $NpmExe -Args @("run", "build:viral")
     if (-not $NoRender) {
-        & npm run render:viral
+        Invoke-Native -Exe $NpmExe -Args @("run", "render:viral")
     } else { Write-Host "  -NoRender set, skipping remotion render" -ForegroundColor DarkYellow }
 } else { Skip "Step 5b -- ImasFrontierViralCut" }
 
