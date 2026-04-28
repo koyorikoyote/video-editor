@@ -14,6 +14,8 @@
 // remapped duration would be near-zero.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { polishCaptions } from "./lib/polish-captions.mjs";
+import { writeSubtitles } from "./lib/subtitle-export.mjs";
 
 const TRANSCRIPT = "public/transcript.json";
 const OVERRIDES = "public/translations.json";
@@ -93,6 +95,10 @@ for (const seg of transcript) {
   captions.push({ startSec, endSec, en, jp, bn });
 }
 
+// Whole-list contextual review via Ollama (gemma4:e4b). Bengali is treated
+// as ground truth; only JP and EN are improved. Disable with POLISH_CAPTIONS=0.
+const polished = await polishCaptions(captions, "JapanPromo captions");
+
 const ts = `export type TriCaption = {
   startSec: number;
   endSec: number;
@@ -108,20 +114,25 @@ const ts = `export type TriCaption = {
 //
 // English + third-language fields (jp for bn-source segments, bn for
 // ja-source) come from public/translations.json, written by
-// scripts/translate-nllb.mjs (NLLB-200 via Transformers.js).
+// scripts/translate-nllb.mjs (NLLB-200 via Transformers.js), then polished
+// in-context by Ollama gemma4:e4b (scripts/lib/polish-captions.mjs).
 //
 // To rebuild:
 //   python scripts/transcribe.py public/main-enhanced.mp4
 //   node scripts/translate-nllb.mjs
 //   node scripts/build-captions.mjs
 
-export const captions: TriCaption[] = ${JSON.stringify(captions, null, 2)};
+export const captions: TriCaption[] = ${JSON.stringify(polished, null, 2)};
 `;
 
 await writeFile(OUT, ts);
+
+const subBase = "out/japan-promo";
+const subFiles = await writeSubtitles(polished, subBase);
 
 const missingThird = captions.filter((c) => !c.jp || !c.bn).length;
 console.log(
   `wrote ${captions.length} captions to ${OUT}` +
     (missingThird ? ` (${missingThird} missing third-language translation)` : ""),
 );
+console.log(`wrote ${subFiles.length} subtitle files: ${subBase}.{en,jp,bn,}.{srt,vtt}`);

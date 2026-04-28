@@ -15,6 +15,9 @@ import { exec } from "node:child_process";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { promisify } from "node:util";
+import { pipeline } from "@xenova/transformers";
+import { polishCaptions } from "./lib/polish-captions.mjs";
+import { writeSubtitles } from "./lib/subtitle-export.mjs";
 
 const run = promisify(exec);
 
@@ -28,6 +31,47 @@ const TMP_DIR = "public/.viral-tmp";
 const FFMPEG = process.env.FFMPEG || "ffmpeg";
 
 const viral = JSON.parse(await readFile(VIRAL, "utf8"));
+
+// ---------------------------------------------------------------------------
+// Trim trailing segments so we (a) stay within the target duration window
+// and (b) never end on a segment whose source text is cut off mid-sentence
+// (Whisper's VAD chunking sometimes truncates the last word). Honor (b)
+// strictly even if it pushes us under target_min — better short and clean
+// than long and unnatural.
+// ---------------------------------------------------------------------------
+const TARGET_MIN = viral.targetMinSec ?? 60;
+const TARGET_MAX = viral.targetMaxSec ?? 90;
+const SENTENCE_END = /[।.!?…。]["'""'')\]\s]*$/;
+const endsCleanly = (text) => SENTENCE_END.test((text || "").trim());
+
+const kept = [...viral.segments];
+let totalForTrim = kept.reduce((a, s) => a + s.durationSec, 0);
+
+while (kept.length > 1) {
+  const last = kept[kept.length - 1];
+  const overBudget = totalForTrim > TARGET_MAX;
+  const midSentence = !endsCleanly(last.source);
+  if (!overBudget && !midSentence) break;
+
+  kept.pop();
+  totalForTrim -= last.durationSec;
+  const reason = overBudget && midSentence
+    ? "over-budget + mid-sentence"
+    : overBudget
+      ? `over budget (${TARGET_MAX}s cap)`
+      : "ends mid-sentence";
+  console.warn(
+    `  dropping trailing seg idx=${last.idx} (${last.durationSec}s, ${reason})`,
+  );
+}
+
+if (totalForTrim < TARGET_MIN) {
+  console.warn(
+    `  ! after trimming, total is ${totalForTrim.toFixed(1)}s (< targetMin ${TARGET_MIN}s) — proceeding anyway, prefer short+clean over long+truncated`,
+  );
+}
+
+viral.segments = kept;
 
 const cutmapText = await readFile(CUTMAP_TS, "utf8");
 const cutmapMatch = cutmapText.match(/export const keptSegments[^=]*=\s*(\[[\s\S]*?\]);/);
@@ -46,6 +90,45 @@ const remap = (originalSec) => {
 
 await rm(TMP_DIR, { recursive: true, force: true });
 await mkdir(TMP_DIR, { recursive: true });
+
+// Split Bengali (or any) text into sentences using language-appropriate
+// sentence-final punctuation. Punctuation is re-attached to each sentence.
+function splitBengaliSentences(text) {
+  if (!text) return [];
+  const splitter = /([।!?…]+\s*)/g;
+  const parts = text.split(splitter);
+  const out = [];
+  for (let i = 0; i < parts.length; i += 2) {
+    const body = (parts[i] || "").trim();
+    const punc = (parts[i + 1] || "").trim();
+    if (body) out.push(punc ? `${body}${punc}` : body);
+  }
+  return out.length ? out : [text.trim()];
+}
+
+const MIN_SUBCAPTION_SEC = 1.4;
+
+// ---------------------------------------------------------------------------
+// Load NLLB-200 once. We re-translate each Bengali sentence directly so
+// per-caption JP and EN are aligned with what's spoken in that sub-window
+// (the segment-level translations.json output drifts on long inputs and was
+// causing the "wonky translations / endless repeat" feel — the same loose
+// JP block was lingering for 20+ s while the speaker had moved on).
+// ---------------------------------------------------------------------------
+console.log("loading NLLB-200 for per-sentence retranslation ...");
+const translator = await pipeline("translation", "Xenova/nllb-200-distilled-600M");
+
+const NLLB = { ja: "jpn_Jpan", bn: "ben_Beng", en: "eng_Latn" };
+
+async function nllbBatch(texts, srcLang, tgtLang) {
+  if (texts.length === 0) return [];
+  const out = await translator(texts, {
+    src_lang: NLLB[srcLang],
+    tgt_lang: NLLB[tgtLang],
+  });
+  const arr = Array.isArray(out) ? out : [out];
+  return arr.map((r) => (r?.translation_text ?? "").trim());
+}
 
 const concatList = [];
 const captions = [];
@@ -78,13 +161,34 @@ for (let i = 0; i < viral.segments.length; i++) {
   // Otherwise paths get doubled (e.g. public/.viral-tmp/public/.viral-tmp/part_000.mp4).
   concatList.push(`file '${basename(part)}'`);
 
-  captions.push({
-    startSec: +timelineSec.toFixed(3),
-    endSec: +(timelineSec + dur).toFixed(3),
-    jp: (seg.jp || "").trim(),
-    bn: (seg.bn || seg.source || "").trim(),
-    en: (seg.en || "").trim(),
-  });
+  // Sentence-level captions, with JP/EN re-translated PER SENTENCE for
+  // tighter alignment to what the speaker is saying right now.
+  const bnSentences = splitBengaliSentences(seg.bn || seg.source);
+  const totalChars = bnSentences.reduce((a, s) => a + s.length, 0) || 1;
+  const subDurs = bnSentences.map((s) =>
+    Math.max(MIN_SUBCAPTION_SEC, dur * (s.length / totalChars)),
+  );
+  // Re-normalize: the Math.max above can push the sum past `dur`. Scale back.
+  const sumSubs = subDurs.reduce((a, b) => a + b, 0);
+  if (sumSubs > 0) {
+    for (let s = 0; s < subDurs.length; s++) subDurs[s] *= dur / sumSubs;
+  }
+
+  const jpSentences = await nllbBatch(bnSentences, "bn", "ja");
+  const enSentences = await nllbBatch(bnSentences, "bn", "en");
+
+  let cursor = timelineSec;
+  for (let s = 0; s < bnSentences.length; s++) {
+    const sd = subDurs[s];
+    captions.push({
+      startSec: +cursor.toFixed(3),
+      endSec: +(cursor + sd).toFixed(3),
+      jp: (jpSentences[s] || "").trim(),
+      bn: bnSentences[s].trim(),
+      en: (enSentences[s] || "").trim(),
+    });
+    cursor += sd;
+  }
 
   timelineSec += dur;
 }
@@ -98,6 +202,12 @@ await run(
 );
 
 const totalDuration = +timelineSec.toFixed(3);
+
+// Whole-list contextual review: gemma4:e4b sees every caption together so it
+// can fix translation drift / awkward phrasing / topic mismatches that NLLB
+// can't catch in isolation. Bengali is treated as ground truth. Best-effort:
+// if Ollama is down or returns garbage, originals are kept.
+const polished = await polishCaptions(captions, "viral-cut captions");
 
 const ts = `export type ViralCaption = {
   startSec: number;
@@ -113,14 +223,19 @@ const ts = `export type ViralCaption = {
 
 export const viralCutDurationSec = ${totalDuration};
 
-export const viralCutCaptions: ViralCaption[] = ${JSON.stringify(captions, null, 2)};
+export const viralCutCaptions: ViralCaption[] = ${JSON.stringify(polished, null, 2)};
 `;
 
 await writeFile(OUT_TS, ts, "utf8");
 
 await rm(TMP_DIR, { recursive: true, force: true });
 
+// Subtitle sidecar files alongside the rendered MP4.
+const subBase = "out/imas-frontier-viral";
+const subFiles = await writeSubtitles(polished, subBase);
+
 console.log(
   `\nwrote ${OUT_VIDEO} (${totalDuration.toFixed(2)}s) and ${OUT_TS} (${captions.length} captions)`,
 );
+console.log(`wrote ${subFiles.length} subtitle files: ${subBase}.{en,jp,bn,}.{srt,vtt}`);
 console.log("Next step: npx remotion render ImasFrontierViralCut");

@@ -158,6 +158,28 @@ render them to verify nothing critical sits under platform UI overlays.
 | `OLLAMA_TIMEOUT_MS` | `0` (no timeout) | Per-request timeout in ms; raise if the model is slow on your hardware |
 | `TARGET_MIN` / `TARGET_MAX` | `60` / `90` | Duration window (sec) |
 | `FFMPEG` | `ffmpeg` | ffmpeg binary path used by `build-viral-cut.mjs` |
+| `POLISH_CAPTIONS` | enabled | Set to `0` to skip the Ollama whole-list caption-polish pass (see below) |
+| `POLISH_BATCH_SIZE` | `10` | Captions per Ollama batch in the polish pass |
+
+### Caption polish pass
+
+Both `build-captions.mjs` and `build-viral-cut.mjs` now run a final
+contextual review of every caption through `gemma4:e4b`. The model sees
+the full ordered list (in batches), uses the Bengali source as ground
+truth, and rewrites JP/EN lines that drifted off-topic, hallucinated,
+or read awkwardly. Originals are kept on any per-batch failure, so this
+is a best-effort quality boost rather than a hard requirement.
+
+Subtitle sidecars are written next to each rendered MP4:
+
+```
+out/japan-promo.{en,jp,bn,}.{srt,vtt}            # 8 files for JapanPromo
+out/imas-frontier-viral.{en,jp,bn,}.{srt,vtt}    # 8 files for ImasFrontierViralCut
+```
+
+The bare-name `out/<video>.srt` / `out/<video>.vtt` are trilingual
+(BN/JP/EN stacked per cue); the per-language files are single-language
+for upload to platforms that accept one subtitle track per language.
 
 Disable the module without removing it: set `enabled: false` in the
 `ImasFrontierViralCut` defaultProps in `src/Root.tsx`.

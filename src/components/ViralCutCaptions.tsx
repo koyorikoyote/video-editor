@@ -57,11 +57,15 @@ const CaptionCard: React.FC<{ caption: ViralCaption }> = ({ caption }) => {
           position: "absolute",
           left: SAFE.titleX,
           right: SAFE.titleX,
-          bottom: SAFE.titleY,
+          // Sit well below face (face center is at y≈960; canvas is 1920 tall).
+          // 220 from bottom keeps captions clear of FB/IG mobile reactions
+          // chrome (~180-200 px tall) while staying low enough that the
+          // BN/JP/EN stack won't ride up over the speaker.
+          bottom: 220,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 8,
+          gap: 6,
           opacity,
           transform: `translateY(${translateY}px)`,
         }}
@@ -70,7 +74,7 @@ const CaptionCard: React.FC<{ caption: ViralCaption }> = ({ caption }) => {
         <Line
           text={caption.bn}
           family={fonts.bn}
-          size={42}
+          size={36}
           weight={700}
           color={theme.softWhite}
           accent={theme.copper}
@@ -78,7 +82,7 @@ const CaptionCard: React.FC<{ caption: ViralCaption }> = ({ caption }) => {
         <Line
           text={caption.jp}
           family={fonts.jp}
-          size={34}
+          size={30}
           weight={700}
           color={theme.gold}
           accent={theme.amber}
@@ -86,7 +90,7 @@ const CaptionCard: React.FC<{ caption: ViralCaption }> = ({ caption }) => {
         <Line
           text={caption.en}
           family={fonts.en}
-          size={30}
+          size={26}
           weight={600}
           color={theme.amber}
           accent={theme.copper}
