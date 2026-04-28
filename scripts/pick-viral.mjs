@@ -21,6 +21,9 @@
 //   TARGET_MAX=90                       (seconds)
 
 import { readFile, writeFile } from "node:fs/promises";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
+import { URL } from "node:url";
 
 const TRANSCRIPT = "public/transcript.json";
 const TRANSLATIONS = "public/translations.json";
@@ -34,6 +37,51 @@ const TARGET_MAX = Number(process.env.TARGET_MAX || 90);
 // CPU automatically if Ollama can't find one. Override with OLLAMA_GPU_LAYERS=0
 // to force CPU.
 const NUM_GPU = Number(process.env.OLLAMA_GPU_LAYERS ?? -1);
+// Per-request timeout in ms. Cold gemma4:e4b loads + 30+ Bengali segments
+// can easily exceed Node-fetch's 5-min default. 0 = no timeout.
+const REQUEST_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 0);
+
+// Replacement for global fetch() that uses node:http and lets us set both
+// the socket idle timeout and headers timeout to whatever we want. The
+// Ollama request is localhost so there's no TLS / proxy concern.
+function ollamaPost(url, body) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const lib = u.protocol === "https:" ? httpsRequest : httpRequest;
+    const payload = Buffer.from(body, "utf8");
+    const req = lib(
+      {
+        hostname: u.hostname,
+        port: u.port || (u.protocol === "https:" ? 443 : 80),
+        path: u.pathname + u.search,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": payload.length,
+        },
+      },
+      (res) => {
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => {
+          resolve({
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            status: res.statusCode,
+            text: Buffer.concat(chunks).toString("utf8"),
+          });
+        });
+        res.on("error", reject);
+      },
+    );
+    req.on("error", reject);
+    // 0 disables the socket idle timeout entirely.
+    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      req.destroy(new Error(`Ollama request exceeded ${REQUEST_TIMEOUT_MS}ms`));
+    });
+    req.write(payload);
+    req.end();
+  });
+}
 
 const transcript = JSON.parse(await readFile(TRANSCRIPT, "utf8"));
 let translations = {};
@@ -111,38 +159,54 @@ JSON schema:
 const userPrompt = `Bengali testimonial segments:\n\n${segmentTable}\n\nReturn the JSON now. Total duration of your chosen segments must be between ${TARGET_MIN}s and ${TARGET_MAX}s.`;
 
 console.log(
-  `asking ${MODEL} at ${OLLAMA_URL} (num_gpu=${NUM_GPU === -1 ? "all" : NUM_GPU}) ...`,
+  `asking ${MODEL} at ${OLLAMA_URL} (num_gpu=${NUM_GPU === -1 ? "all" : NUM_GPU}, timeout=${REQUEST_TIMEOUT_MS === 0 ? "none" : REQUEST_TIMEOUT_MS + "ms"}) ...`,
 );
+console.log("  (cold model load + multi-segment reasoning can take several minutes — be patient)");
 const t0 = Date.now();
 
-const res = await fetch(`${OLLAMA_URL}/api/chat`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: MODEL,
-    stream: false,
-    format: "json",
-    options: {
-      temperature: 0.4,
-      num_ctx: 8192,
-      // num_gpu = -1 → offload all layers to GPU when one is detected.
-      // Ollama silently falls back to CPU if no GPU / driver is present.
-      num_gpu: NUM_GPU,
-    },
-    keep_alive: "10m",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-  }),
+const requestBody = JSON.stringify({
+  model: MODEL,
+  stream: false,
+  format: "json",
+  options: {
+    temperature: 0.4,
+    num_ctx: 8192,
+    // num_gpu = -1 → offload all layers to GPU when one is detected.
+    // Ollama silently falls back to CPU if no GPU / driver is present.
+    num_gpu: NUM_GPU,
+  },
+  keep_alive: "10m",
+  messages: [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt },
+  ],
 });
 
-if (!res.ok) {
-  console.error(`Ollama HTTP ${res.status}: ${await res.text()}`);
+let res;
+try {
+  res = await ollamaPost(`${OLLAMA_URL}/api/chat`, requestBody);
+} catch (e) {
+  console.error(`Ollama request failed: ${e.message}`);
+  console.error("  - Is `ollama serve` running?");
+  console.error(`  - Is the model pulled?  ollama pull ${MODEL}`);
+  console.error("  - Set OLLAMA_TIMEOUT_MS=600000 (10 min) if the model is slow on your hardware.");
   process.exit(1);
 }
 
-const body = await res.json();
+if (!res.ok) {
+  console.error(`Ollama HTTP ${res.status}: ${res.text}`);
+  process.exit(1);
+}
+
+let body;
+try {
+  body = JSON.parse(res.text);
+} catch (e) {
+  console.error(`Could not parse Ollama response as JSON: ${e.message}`);
+  console.error(`Raw body (first 500 chars): ${res.text.slice(0, 500)}`);
+  process.exit(1);
+}
+
 const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
 // Ollama reports per-call timing fields; eval_count / eval_duration tells
 // us tokens-per-second, which is the easiest signal that GPU offload took.

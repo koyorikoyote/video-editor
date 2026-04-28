@@ -155,6 +155,7 @@ render them to verify nothing critical sits under platform UI overlays.
 | `OLLAMA_MODEL` | `gemma4:e4b` | Model tag |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama host |
 | `OLLAMA_GPU_LAYERS` | `-1` (all) | `0` to force CPU |
+| `OLLAMA_TIMEOUT_MS` | `0` (no timeout) | Per-request timeout in ms; raise if the model is slow on your hardware |
 | `TARGET_MIN` / `TARGET_MAX` | `60` / `90` | Duration window (sec) |
 | `FFMPEG` | `ffmpeg` | ffmpeg binary path used by `build-viral-cut.mjs` |
 
