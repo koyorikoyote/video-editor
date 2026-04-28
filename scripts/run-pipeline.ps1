@@ -35,6 +35,7 @@ param(
     [switch]$SkipViral,
     [switch]$ViralOnly,             # only re-run 5b
     [switch]$RenderOnly,            # skip steps 1-4 (use existing artifacts), run only 5a + 5b
+    [switch]$WithBroll,             # in step 5b, plan B-roll overlays from public/broll/ via Ollama
     [switch]$NoRender               # build assets but don't run remotion render
 )
 
@@ -303,6 +304,10 @@ if (-not $SkipViral) {
     Step "Step 5b -- ImasFrontierViralCut build + render"
     Write-Host "  (requires 'ollama serve' running with gemma4:e4b)" -ForegroundColor DarkGray
     Invoke-Native -Exe $NpmExe -Args @("run", "build:viral")
+    if ($WithBroll) {
+        Step "Step 5b.1 -- B-roll plan (public/broll/ + Ollama)"
+        Invoke-Native -Exe $NpmExe -Args @("run", "plan:broll")
+    }
     if (-not $NoRender) {
         Invoke-Native -Exe $NpmExe -Args @("run", "render:viral")
     } else { Write-Host "  -NoRender set, skipping remotion render" -ForegroundColor DarkYellow }

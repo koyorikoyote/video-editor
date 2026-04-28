@@ -47,6 +47,7 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "build:viral": "node scripts/pick-viral.mjs && node scripts/build-viral-cut.mjs",
+    "plan:broll": "node scripts/plan-broll.mjs",
     "render:viral": "remotion render ImasFrontierViralCut",
     "pipeline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-pipeline.ps1",
     "postinstall": "patch-package"

@@ -10,6 +10,7 @@ import {
   DriftingGlyphs,
   LightStreaks,
 } from "./components/AmbitionGraphics";
+import { BrollOverlayLayer } from "./components/BrollOverlay";
 import { SafeZone } from "./components/SafeZone";
 import { ViralCutCaptions } from "./components/ViralCutCaptions";
 import { ViralIntro } from "./components/ViralIntro";
@@ -99,6 +100,10 @@ const ViralBody: React.FC<{ videoSrc: string; voiceVolume: number }> = ({
           "radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(14,10,6,0.6) 100%)",
       }}
     />
+
+    {/* B-roll overlays (muted; A-roll voice keeps playing). Renders nothing
+        when src/data/brollPlan.ts is empty (i.e. you didn't run the planner). */}
+    <BrollOverlayLayer />
 
     {/* Subtle moving graphics over the A-roll */}
     <DriftingGlyphs seed="body" count={6} speed={18} />

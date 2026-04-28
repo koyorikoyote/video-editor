@@ -41,6 +41,7 @@ Useful flags:
 npm run pipeline -- -Src "public/foo.MP4"        # explicit source override
 npm run pipeline -- -ViralOnly                   # re-run only the viral cut (5b)
 npm run pipeline -- -SkipViral                   # JapanPromo only (5a)
+npm run pipeline -- -WithBroll                   # add Ollama-curated B-roll overlays to viral cut
 npm run pipeline -- -NoRender                    # build assets, skip remotion render
 ```
 
@@ -267,8 +268,48 @@ patches/
 | Volume defaults | `defaultProps` in `src/Root.tsx` |
 | Canvas / safe zone | `VIDEO_WIDTH`/`VIDEO_HEIGHT`/`SAFE` in `src/theme.ts` |
 
-## B-roll (disabled)
+## B-roll for the viral cut (opt-in, user clips)
 
-Wired in [MainSegment.tsx](src/components/MainSegment.tsx) but commented out.
-To re-enable: `export PEXELS_API_KEY=...`, `node scripts/fetch-broll.mjs ...`,
-then mount `<BRoll>` gated by `data/broll.ts`.
+The `ImasFrontierViralCut` composition supports an optional B-roll overlay
+layer. Drop your own clips into [public/broll/](public/broll/) — the Pexels
+fetcher is no longer the source of truth.
+
+```powershell
+# 1. Drop clips into public/broll/   (.mp4 / .mov / .m4v / .webm)
+ls public/broll/
+
+# 2. Plan + emit src/data/brollPlan.ts (and inspectable public/broll-plan.json)
+npm run plan:broll
+
+# 3. Re-render the viral cut with the overlays
+npm run render:viral
+```
+
+Or all in one step:
+
+```powershell
+npm run pipeline -- -WithBroll              # full pipeline incl. B-roll plan
+npm run pipeline -- -ViralOnly -WithBroll   # just re-curate viral cut + B-roll
+```
+
+What `plan-broll.mjs` does:
+
+- Probes each clip in `public/broll/` for duration via mediabunny.
+- Reads the post-polish caption timeline from `src/data/viralCut.ts`.
+- Sends both lists to `gemma4:e4b` with hard rules: each overlay 1.5–5 s,
+  ≥ 2.5 s gap between overlays, none in the first/last 3 s of the cut,
+  total coverage ≤ 40 % of the viral cut, no back-to-back repeats, prefer
+  visual-topical match (read from filenames).
+- Validates the response, drops anything that violates the rules, writes
+  `public/broll-plan.json` (hand-editable) and `src/data/brollPlan.ts`.
+
+Rendering: each overlay is a `<Video>` `<Sequence>` layered over the A-roll,
+**muted** so the speaker's voice keeps playing, with 0.4 s opacity
+crossfades on entry/exit. Captions stay on top. If `brollPlan` is empty
+(you didn't run the planner), the overlay layer renders nothing — composition
+is unaffected.
+
+Naming tip: name your clips after what they show (e.g.
+`dhaka-classroom.mp4`, `tokyo-station.mp4`, `students-laughing.mp4`). The
+planner reads only the filename to judge topical fit, so descriptive names
+land more accurate placements.
