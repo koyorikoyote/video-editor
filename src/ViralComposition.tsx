@@ -85,11 +85,26 @@ export const ViralComposition: React.FC<ViralProps> = ({
   );
 };
 
+// AUDIO-CONTINUITY CONTRACT for the viral-cut body:
+//   - The ONLY component that emits audio is <ZoomVideo> (the A-roll). It
+//     is mounted for the entire body duration, never unmounted or paused
+//     by anything below it, so the speaker's voice plays uninterrupted
+//     across the whole cut — including under B-roll overlays.
+//   - Every other layer below is visual-only (opacity, motion graphics,
+//     captions). <BrollOverlayLayer> in particular renders B-roll <Video>
+//     elements with muted + volume={0} so they NEVER contribute to the
+//     audio mix — they just cover the A-roll visually via opacity.
+//   - Do NOT add audio-emitting components (e.g. another <Video> with
+//     audio, an <Audio> tag) without ducking <ZoomVideo> first, or the
+//     mix will diverge from what the captions describe.
 const ViralBody: React.FC<{ videoSrc: string; voiceVolume: number }> = ({
   videoSrc,
   voiceVolume,
 }) => (
   <AbsoluteFill style={{ background: "#0E0A06" }}>
+    {/* A-roll: source of all audio. Visually covered by B-roll overlays
+        when active, but its <Video> element stays mounted so the speech
+        track keeps playing in continuity with the captions. */}
     <ZoomVideo src={videoSrc} zoomCycleSec={14} volume={voiceVolume} />
 
     {/* Warm vignette for caption legibility */}
@@ -101,8 +116,9 @@ const ViralBody: React.FC<{ videoSrc: string; voiceVolume: number }> = ({
       }}
     />
 
-    {/* B-roll overlays (muted; A-roll voice keeps playing). Renders nothing
-        when src/data/brollPlan.ts is empty (i.e. you didn't run the planner). */}
+    {/* B-roll overlays — visual-only. Audio of B-roll clips is muted; the
+        A-roll above keeps playing the speaker's voice underneath. Renders
+        nothing when src/data/brollPlan.ts is empty (no plan generated). */}
     <BrollOverlayLayer />
 
     {/* Subtle moving graphics over the A-roll */}
